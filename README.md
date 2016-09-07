@@ -1,4 +1,4 @@
-# cs182-f16-homework
+# cs182-f16-homeworks
 Seed repository for homeworks in cs182, f16
 
 Welcome to CS182! This repository will house your homework assignments.
