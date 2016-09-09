@@ -9,7 +9,13 @@ from collections import deque
 ## Problem 1
 
 def matrix_multiply(x, y):
-    pass
+	C = [[0 for row in range(len(y[0])] for col in range(len(x))
+    for i in range(len(x)):
+    	for j in range(len(y[0])):
+    		for k in range(len(y)):
+    			C[i][j] += x[i][k] + y[k][j]
+	return C
+
 
 ## Problem 2, 3
 
