@@ -7,15 +7,15 @@ import copy
 from collections import deque
 
 ## Problem 1
-
 def matrix_multiply(x, y):
-	C = [[0 for row in range(len(y[0])] for col in range(len(x))
-    for i in range(len(x)):
-    	for j in range(len(y[0])):
-    		for k in range(len(y)):
-    			C[i][j] += x[i][k] + y[k][j]
-	return C
-
+	rows = len(x)
+	cols = len(y[0])
+	z = [[0 for row in range(rows)] for col in range(cols)]
+	for i in range(rows):
+		for j in range(cols):
+			for k in range(len(x[0])):
+				z[i][j] += x[i][k] * y[k][j]
+	return z
 
 ## Problem 2, 3
 
