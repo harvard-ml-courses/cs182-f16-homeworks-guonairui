@@ -30,44 +30,81 @@ class MyQueue:
         else:
         	return self.items.popleft()
     def __eq__(self, other):
-        pass
+        while len(self.items) > 0:
+        	if self.pop() != other.pop():
+        		return False
+		return True
     def __ne__(self, other):
-        pass
+        while len(self.items) > 0:
+        	if self.pop() != other.pop():
+        		return True
+		return False
     def __str__(self):
-        pass
+    	a = ""
+        for i in self.items:
+        	a = a + str(i)
+    	return a
 
 class MyStack:
     def __init__(self):
-        pass
+        self.items = deque()
     def push(self, val):
-        pass
+        self.items.append(val)
     def pop(self):
-        pass
+        if len(self.items) == 0:
+        	return None
+    	else:
+    		return self.items.pop()
     def __eq__(self, other):
-        pass
+        while len(self.items) > 0:
+        	if self.pop() != other.pop():
+        		return False
+		return True
     def __ne__(self, other):
-        pass
+        while len(self.items) > 0:
+        	if self.pop() != other.pop():
+        		return True
+		return False
     def __str__(self):
-        pass
+        a = ""
+        for i in self.items:
+        	a = a + str(i)
+    	return a
 
 ## Problem 4
 
 def add_position_iter(lst, number_from=0):
-    pass
+	temp = []
+	for i in range(len(lst)):
+		temp.append(lst[i] + i + number_from)
+	return temp
 
 def add_position_recur(lst, number_from=0):
-    pass
+    temp = []
+    if len(lst) == 1:
+    	temp.append(lst[0])
+    	return temp.reverse()
 
 def add_position_map(lst, number_from=0):
-    pass
+	# a = list(enumerate(lst, start = number_from))
+	# return list(map(lambda x: x[0][0] + x[0][1], a))
+	pass
+
+
+# ret = add_position_map([7, 5, 1, 4])
+# print ret
 
 ## Problem 5
 
 def remove_course(roster, student, course):
-    pass
+    if student in roster and course in roster.get(student):
+    	roster.get(student).remove(course)
+	return roster
 
 ## Problem 6
 
 def copy_remove_course(roster, student, course):
-    pass
+    temp = copy.deepcopy(roster)
+    remove_course(temp, student, course)
+    return temp
 
