@@ -7,13 +7,19 @@ import copy
 from collections import deque
 
 ## Problem 1
+
 def matrix_multiply(x, y):
 	rows = len(x)
 	cols = len(y[0])
-	z = [[0 for row in range(rows)] for col in range(cols)]
+	colsx = len(x[0])
+
+	if colsx != len(y):
+		return "Invalid dimensions"
+
+	z = [[0 for col in range(cols)] for row in range(rows)]
 	for i in range(rows):
 		for j in range(cols):
-			for k in range(len(x[0])):
+			for k in range(colsx):
 				z[i][j] += x[i][k] * y[k][j]
 	return z
 
@@ -80,15 +86,13 @@ def add_position_iter(lst, number_from=0):
 	return temp
 
 def add_position_recur(lst, number_from=0):
-	a = list(enumerate(lst, start = number_from))
 	if len(lst) == 0:
 		return lst
-	return add_position_recur(lst[:-1], number_from) + [a[-1][0] + a[-1][1]]
+	return add_position_recur(lst[:-1], number_from) + [lst[-1] + len(lst) - 1 + number_from]
 
 def add_position_map(lst, number_from=0):
 	a = list(enumerate(lst, start = number_from))
 	return list(map(lambda (x): x[0] + x[1], a))
-	pass
 
 ## Problem 5
 
