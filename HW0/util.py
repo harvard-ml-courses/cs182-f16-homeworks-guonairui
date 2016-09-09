@@ -21,11 +21,14 @@ def matrix_multiply(x, y):
 
 class MyQueue:
     def __init__(self):
-        pass
+        self.items = deque()
     def push(self, val):
-        pass
+        self.items.append(val)
     def pop(self):
-        pass
+    	if len(self.items) == 0:
+    		return None
+        else:
+        	return self.items.popleft()
     def __eq__(self, other):
         pass
     def __ne__(self, other):
