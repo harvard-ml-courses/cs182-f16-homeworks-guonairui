@@ -80,19 +80,15 @@ def add_position_iter(lst, number_from=0):
 	return temp
 
 def add_position_recur(lst, number_from=0):
-    temp = []
-    if len(lst) == 1:
-    	temp.append(lst[0])
-    	return temp.reverse()
+	a = list(enumerate(lst, start = number_from))
+	if len(lst) == 0:
+		return lst
+	return add_position_recur(lst[:-1], number_from) + [a[-1][0] + a[-1][1]]
 
 def add_position_map(lst, number_from=0):
-	# a = list(enumerate(lst, start = number_from))
-	# return list(map(lambda x: x[0][0] + x[0][1], a))
+	a = list(enumerate(lst, start = number_from))
+	return list(map(lambda (x): x[0] + x[1], a))
 	pass
-
-
-# ret = add_position_map([7, 5, 1, 4])
-# print ret
 
 ## Problem 5
 
