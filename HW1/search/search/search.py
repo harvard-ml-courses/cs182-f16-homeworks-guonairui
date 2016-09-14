@@ -88,7 +88,7 @@ def depthFirstSearch(problem):
 
     """
     fringe = util.Stack()
-    visited = []
+    visited = set()
     fringe.push((problem.getStartState(), [], 0))
 
     while not fringe.isEmpty():
@@ -100,10 +100,10 @@ def depthFirstSearch(problem):
     	if problem.isGoalState(state):
     		return moves
 
-    	visited += [state]
+    	visited.add(state)
 
-    	for new, next, cost in problem.getSuccessors(state):
-    		fringe.push((new, moves + [next], total + cost))
+    	for new, nextt, cost in problem.getSuccessors(state):
+    		fringe.push((new, moves + [nextt], total + cost))
 
     return []
 
@@ -112,23 +112,47 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
 
+    # fringe = util.Queue()
+    # visited = []
+    # fringe.push((problem.getStartState(), [], 0))
+
+    # while not fringe.isEmpty():
+    # 	state, moves, total = fringe.pop()
+    #     # print state
+
+    # 	if state in visited:
+    # 		continue
+
+    # 	if problem.isGoalState(state):
+    #         # print moves
+    #         return moves
+
+    # 	visited += [state]
+
+    # 	for new, nextt, cost in problem.getSuccessors(state):
+    # 		fringe.push((new, moves + [nextt], total + cost))
+
+    # return []
+
     fringe = util.Queue()
-    visited = []
+    visited = set()
     fringe.push((problem.getStartState(), [], 0))
 
     while not fringe.isEmpty():
-    	state, moves, total = fringe.pop()
+        state, moves, total = fringe.pop()
+        # print state
 
-    	if state in visited:
-    		continue
+        if state in visited:
+            continue
 
-    	if problem.isGoalState(state):
-    		return moves
+        if problem.isGoalState(state):
+            # print moves
+            return moves
 
-    	visited += [state]
+        visited.add(state)
 
-    	for new, next, cost in problem.getSuccessors(state):
-    		fringe.push((new, moves + [next], total + cost))
+        for new, nextt, cost in problem.getSuccessors(state):
+            fringe.push((new, moves + [nextt], total + cost))
 
     return []
 
@@ -138,7 +162,7 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
 
     fringe = util.PriorityQueue()
-    visited = []
+    visited = set()
     fringe.push((problem.getStartState(), [], 0), 0)
 
     while not fringe.isEmpty():
@@ -150,10 +174,10 @@ def uniformCostSearch(problem):
     	if problem.isGoalState(state):
     		return moves
 
-    	visited += [state]
+    	visited.add(state)
 
-    	for new, next, cost in problem.getSuccessors(state):
-    		fringe.push((new, moves + [next], total + cost), total + cost)
+    	for new, nextt, cost in problem.getSuccessors(state):
+    		fringe.push((new, moves + [nextt], total + cost), total + cost)
 
     return []
 
@@ -170,7 +194,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     fringe = util.PriorityQueue()
-    visited = []
+    visited = set()
     fringe.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
 
     while not fringe.isEmpty():
@@ -182,10 +206,10 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     	if problem.isGoalState(state):
     		return moves
 
-    	visited += [state]
+    	visited.add(state)
 
-    	for new, next, cost in problem.getSuccessors(state):
-    		fringe.push((new, moves + [next], total + cost), total + cost + heuristic(new, problem))
+    	for new, nextt, cost in problem.getSuccessors(state):
+    		fringe.push((new, moves + [nextt], total + cost), total + cost + heuristic(new, problem))
 
     return []
 
