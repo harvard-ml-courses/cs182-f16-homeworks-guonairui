@@ -472,6 +472,31 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    # Trying to find manhattan distance to farthes food pellet
+    # foodList = foodGrid.asList()
+    # maxi = 0
+    # for x in range(len(foodList)):
+    #     for y in range(len(foodList[0])):
+    #         if foodGrid[x][y]:
+    #             dist = abs(position[0] - x) + abs(position[1] - y)
+    #             if dist > maxi:
+    #                 maxi = dist
+    # return maxi
+
+    # Trying to find average manhattan distance
+    # foodList = foodGrid.asList()
+    # total = 0
+    # for x in range(len(foodList)):
+    #     for y in range(len(foodList[0])):
+    #         if foodGrid[x][y]:
+    #             dist = abs(position[0] - x) + abs(position[1] - y)
+    #             total += dist
+
+    # if foodGrid.count() == 0:
+    #     return 0
+    # else:
+    #     return total / foodGrid.count()
+
     return foodGrid.count()
 
 class ClosestDotSearchAgent(SearchAgent):
