@@ -481,30 +481,16 @@ def foodHeuristic(state, problem):
             maxi = dist
     return maxi
 
-    # Trying to find average manhattan distance
-    # foodList = foodGrid.asList()
-    # total = 0
-    # for x in range(len(foodList)):
-    #     for y in range(len(foodList[0])):
-    #         if foodGrid[x][y]:
-    #             dist = abs(position[0] - x) + abs(position[1] - y)
-    #             total += dist
-
-    # if foodGrid.count() == 0:
-    #     return 0
-    # else:
-    #     return total / foodGrid.count()
-
-    # return foodGrid.count()
-
     # Trying to combine manhattan distance and foodGrid count
     # foodList = foodGrid.asList()
     # maxi = 0
-    # for x,y in foodList:
-    #     if not foodGrid[x][y]:
-    #         print "found false"
-    #         maxi += 1
-    # return maxi + foodGrid.count()
+    # for x1,y1 in foodList:
+    #     for x2,y2 in foodList:
+    #         dist = abs(x1 - x2) + abs(y1 - y2)
+    #         if dist > maxi:
+    #             maxi = dist
+    #         print maxi
+    # return maxi
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
