@@ -32,6 +32,8 @@ The parts you fill in start about 3/4 of the way down.  Follow the project
 description for details.
 
 Good luck and happy searching!
+
+LARRY GUO + AUGUST HOLM
 """
 
 from game import Directions
@@ -295,14 +297,17 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+
+        # Simple single line return statement, defines the state as Pac-Man's
+        # position and also a four tuple of coordinates for the corners
         return (self.startingPosition, self.corners)
-        # return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        # Simple check to see if all corners have been removed from the tuple
         return len(state[1]) == 0
 
     def getSuccessors(self, state):
@@ -323,16 +328,20 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
+            # Initializing variables
             x,y = state[0]
             corners = set(state[1])
+            # Finding the next directions
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+            # Checks for walls
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
+                # Removes a corner from state if the next state visits a corner
                 if nextState in corners:
                     corners.discard(nextState)
+                # Adds the state to the successors
                 successors.append( (( nextState, tuple(corners)), action, 1))
-                # print action, nextState, corners 
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -369,6 +378,7 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
 
+    # Returns the manhattanDistance from Pac-Man to the furthest corner
     position, reached = state
     maxi = 0
     for node in reached:
@@ -376,9 +386,6 @@ def cornersHeuristic(state, problem):
         if dist > maxi:
             maxi = dist
     return maxi
-
-
-    # return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -481,12 +488,18 @@ def foodHeuristic(state, problem):
     #         maxi = dist
     # return maxi
 
-    # Trying to combine manhattan distance and foodGrid count
+    # Combines manhattanDistance to furthest food pellet and the maximum
+    # distance between any two food pellets
+
+    # Initializing and error checking
     foodList = foodGrid.asList()
     if len(foodList) == 0:
         return 0
     foodDist = []
     maxi = 0
+
+    # For every coordinate of food, calculate the manhattanDistance from Pac-Man
+    # and populate a list of all relative food distances
     for x,y in foodList:
         dist = abs(position[0] - x) + abs(position[1] - y)
         if dist > maxi:
@@ -494,6 +507,7 @@ def foodHeuristic(state, problem):
         for a,b in foodList:
             foodDist += [abs(x - a) + abs(y - b)]
 
+    # Returns whichever value is a more accurate estimate (greater)
     if max(foodDist) > maxi:
         return max(foodDist)
     else:
@@ -528,6 +542,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        # Returns the nearest food using aStarSearch
         return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -564,6 +579,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        # Returns a boolean whether or not food exists at that coordinate
         return self.food[x][y]
 
 def mazeDistance(point1, point2, gameState):

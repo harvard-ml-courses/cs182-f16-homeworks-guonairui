@@ -15,6 +15,8 @@
 """
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
+
+LARRY GUO + AUGUST HOLM
 """
 
 import util
@@ -87,66 +89,87 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
 
     """
+
+    "*** YOUR CODE HERE ***"
+    # HERE IS THE NON OPTIMIZED VERSION THAT GETS ALL THE POINTS ON THE AUTOGRADER
+    # Using a stack for the fringe
     fringe = util.Stack()
+
+    # Using a set for visited nodes because it handles duplicate values better
     visited = set()
+    # Pushes the start state
+    fringe.push((problem.getStartState(), [], 0))
+
+    # While the fringe isn't empty
+    while not fringe.isEmpty():
+        state, moves, total = fringe.pop()
+
+        # If we've visited the state, move on to next iteration
+        if state in visited:
+            continue
+
+        # If the problem is a GoalState, return the moves to get there
+        if problem.isGoalState(state):
+            return moves
+
+        # Add the state to visited
+        visited.add(state)
+
+        # Add each successor to the fringe
+        for new, nextt, cost in problem.getSuccessors(state):
+            fringe.push((new, moves + [nextt], total + cost))
+
+    # Return no moves if no goal was met
+    return []
+
+    """
+    # HERE IS THE "OPTIMIZED" VERSION THAT KEEPS TRACK OF THE FRONTIER
+
+    fringe = util.Stack()
+
+    visited = set()
+    frontier = set()
     fringe.push((problem.getStartState(), [], 0))
 
     while not fringe.isEmpty():
-    	state, moves, total = fringe.pop()
+        state, moves, total = fringe.pop()
 
-    	if state in visited:
-    		continue
+        if state in visited:
+            continue
 
-    	if problem.isGoalState(state):
-    		return moves
+        if problem.isGoalState(state):
+            return moves
 
-    	visited.add(state)
+        visited.add(state)
 
-    	for new, nextt, cost in problem.getSuccessors(state):
-    		fringe.push((new, moves + [nextt], total + cost))
+        for new, nextt, cost in problem.getSuccessors(state):
+            if new not in frontier:
+                fringe.push((new, moves + [nextt], total + cost))
+                frontier.add(new)
 
     return []
+    """
 
-    "*** YOUR CODE HERE ***"
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
 
-    # fringe = util.Queue()
-    # visited = []
-    # fringe.push((problem.getStartState(), [], 0))
+    "*** YOUR CODE HERE ***"
 
-    # while not fringe.isEmpty():
-    # 	state, moves, total = fringe.pop()
-    #     # print state
-
-    # 	if state in visited:
-    # 		continue
-
-    # 	if problem.isGoalState(state):
-    #         # print moves
-    #         return moves
-
-    # 	visited += [state]
-
-    # 	for new, nextt, cost in problem.getSuccessors(state):
-    # 		fringe.push((new, moves + [nextt], total + cost))
-
-    # return []
-
+    # HERE IS THE NON OPTIMIZED VERSION THAT GETS ALL THE POINTS ON THE AUTOGRADER
+    
     fringe = util.Queue()
     visited = set()
     fringe.push((problem.getStartState(), [], 0))
 
     while not fringe.isEmpty():
         state, moves, total = fringe.pop()
-        # print state
 
         if state in visited:
             continue
 
         if problem.isGoalState(state):
-            # print moves
             return moves
 
         visited.add(state)
@@ -156,15 +179,49 @@ def breadthFirstSearch(problem):
 
     return []
 
-    "*** YOUR CODE HERE ***"
+    """
+    # HERE IS THE OPTIMIZED VERSION THAT KEEPS TRACK OF THE FRONTIER
+    # Using a queue for the fringe
+    fringe = util.Queue()
+    visited = set()
+    frontier = set()
+    fringe.push((problem.getStartState(), [], 0))
+
+    # Continues to push new successor states onto the fringe while ignoring visited
+    # states and also returning moves if the state is a goal
+    while not fringe.isEmpty():
+        state, moves, total = fringe.pop()
+
+        if state in visited:
+            continue
+
+        visited.add(state)
+
+        # Optimization for BFS where it checks for goal on push not pop
+        for new, nextt, cost in problem.getSuccessors(state):
+            if problem.isGoalState(new):
+                return moves + [nextt]
+            if new not in frontier:
+                fringe.push((new, moves + [nextt], total + cost))
+                frontier.add(new)
+
+    return []
+    """
+    
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
 
+    "*** YOUR CODE HERE ***"
+
+    # Using a priority queue for the fringe
     fringe = util.PriorityQueue()
     visited = set()
     fringe.push((problem.getStartState(), [], 0), 0)
 
+    # Continues to push new successor states onto the fringe while ignoring visited
+    # states and also returning moves if the state is a goal.
+    # Calculates priority solely on the cost of the actions it takes to get to that state
     while not fringe.isEmpty():
     	state, moves, total = fringe.pop()
 
@@ -181,8 +238,6 @@ def uniformCostSearch(problem):
 
     return []
 
-    "*** YOUR CODE HERE ***"
-
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -193,10 +248,16 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
+    "*** YOUR CODE HERE ***"
+
+    # Using a priority queue for the fringe
     fringe = util.PriorityQueue()
     visited = set()
     fringe.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
 
+    # Continues to push new successor states onto the fringe while ignoring visited
+    # states and also returning moves if the state is a goal.
+    # Pushes priority based on a heuristic as well as cost from the start state
     while not fringe.isEmpty():
     	state, moves, total = fringe.pop()
 
@@ -212,8 +273,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     		fringe.push((new, moves + [nextt], total + cost), total + cost + heuristic(new, problem))
 
     return []
-
-    "*** YOUR CODE HERE ***"
 
 
 # Abbreviations
