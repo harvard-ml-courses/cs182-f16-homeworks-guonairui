@@ -133,6 +133,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         numAgents = gameState.getNumAgents()
 
+        # Trying to implement the dispatch recursive minimax algorithm to account for multiple ghosts
+        # itera is just used to keep track of the depth we are meant to go to
+        # the agentIndex increments so we can get movements through each ghost and PacMan
+
         def value(state, agentIndex, itera):
             if itera == (self.depth * numAgents):
               return (action, self.evaluationFunction(state))
@@ -141,7 +145,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
               return maxValue(state, agentIndex, itera)
             else:
               return minValue(state, agentIndex, itera)
-
+        # This is kinda directly from the pseudocode which I think is just useless lmao
         # def maxValue(state, agentIndex, itera):
         #     v = float("-inf")
         #     itera += 1
@@ -158,6 +162,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #       # print v
         #     return v
 
+        # I'm trying to get to a point where I can keep track of which move had the max score
         def minValue(state, agentIndex, itera):
             values = []
             itera += 1
