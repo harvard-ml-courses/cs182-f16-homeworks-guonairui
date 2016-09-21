@@ -168,7 +168,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
               v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
             return v
 
-        # assosciate each of the legal actions with their score, and then pick the max of the scores 
+        # associate each of the legal actions with their score, and then pick the max of the scores 
         # and returning the action 
         scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, 1)) for action in legalMoves]
         bestMove = max(scores, key = lambda t: t[1])[0]
@@ -227,7 +227,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
               alpha = max(alpha, v)
             return v
 
-        # assosciate each of the legal actions with their score, and then pick the max of the scores 
+        # associate each of the legal actions with their score, and then pick the max of the scores 
         # and returning the action 
         scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, float('-inf'), float('inf'), 1)) for action in legalMoves]
         bestMove = max(scores, key = lambda t: t[1])[0]
