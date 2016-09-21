@@ -131,33 +131,48 @@ class MinimaxAgent(MultiAgentSearchAgent):
         
         "*** YOUR CODE HERE ***"
 
-        depth = 0
         numAgents = gameState.getNumAgents()
 
-        # print gameState.generateSuccessor(1, 'North')
-
-        def value(state, agentIndex, depth):
-            if depth == self.depth:
-              return self.evaluationFunction(state)
+        def value(state, agentIndex, itera):
+            if itera == (self.depth * numAgents):
+              return (action, self.evaluationFunction(state))
+            agentIndex = agentIndex % numAgents
             if agentIndex == 0:
-              return maxValue(state, agentIndex)
+              return maxValue(state, agentIndex, itera)
             else:
-              return minValue(state, agentIndex)
+              return minValue(state, agentIndex, itera)
 
-        def maxValue(state, agentIndex, depth):
-            v = float("-inf")
+        # def maxValue(state, agentIndex, itera):
+        #     v = float("-inf")
+        #     itera += 1
+        #     for action in state.getLegalActions(agentIndex):
+        #       v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
+        #       # print v
+        #     return v
+
+        # def minValue(state, agentIndex, itera):
+        #     v = float("inf")
+        #     itera += 1
+        #     for action in state.getLegalActions(agentIndex):
+        #       v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
+        #       # print v
+        #     return v
+
+        def minValue(state, agentIndex, itera):
+            values = []
+            itera += 1
             for action in state.getLegalActions(agentIndex):
-              v = max(v, value(action, agentIndex, depth))
-            return v
+              values += [(action, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))]
+            return min(values, key = lambda t: t[1])
 
-        def minValue(state, agentIndex):
-            v = float("-inf")
+        def maxValue(state, agentIndex, itera):
+            values = []
+            itera += 1
             for action in state.getLegalActions(agentIndex):
-              v = max(v, maxValue(action, agentIndex, depth))
-            return v
+              values += [(action, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))]
+            return max(values, key = lambda t: t[1])
 
-        for i in range(1, self.depth + 1):
-          print i
+        value(gameState, 0, 0)
 
         return 'Stop'
 
