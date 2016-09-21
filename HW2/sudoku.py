@@ -81,14 +81,25 @@ class Sudoku:
         Returns the first variable with assignment epsilon
         i.e. first square in the board that is unassigned.
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+
+        for i in range(9):
+            for variable in row(i):
+                if variable == 0:
+                    return (i, list.index(0))
 
     def complete(self):
         """
         IMPLEMENT FOR PART 1
         Returns true if the assignment is complete. 
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+
+        for i in range(9):
+            if len(set(row(i))) != 9 or len(set(col(i))) != 9 or len(set(box(i))) != 9:
+                return False
+
+        return True
 
     def variableDomain(self, r, c):
         """
@@ -96,6 +107,8 @@ class Sudoku:
         Returns current domain for the (row, col) variable .
         """
         raise NotImplementedError()
+
+        
 
     # PART 2
     def updateFactor(self, factor_type, i):
