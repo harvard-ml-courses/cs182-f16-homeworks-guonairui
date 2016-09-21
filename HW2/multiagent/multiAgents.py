@@ -134,14 +134,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # get number of agents 
         numAgents = gameState.getNumAgents()
 
+        # What do we care about? We want to know which pac-man action returned 
+        # the move with the best scores. Let's go ahead and get all of 
+        # the actions pac-man can make ('legalMoves')
+        legalMoves = gameState.getLegalActions(self.index)
+
+        # update what will be teh agentIndex parameter for the cal to our 'value' function
+        newIndex = (self.index + 1) % numAgents
+
         def value(state, agentIndex, itera):
             # update agentIndex 
             agentIndex = agentIndex % numAgents
             
             # check if we can ~make moves~ 
-            if itera == (self.depth * numAgents) or not(state.getLegalActions(agentIndex)):
-              return (self.evaluationFunction(state))
-            if agentIndex == 0:
+            if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
+              return self.evaluationFunction(state)
+            if agentIndex == self.index:
               return maxValue(state, agentIndex, itera)
             else:
               return minValue(state, agentIndex, itera)
@@ -160,17 +168,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
               v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
             return v
 
-        # What do we care about? We want to know which pac-man action returned 
-        # the move with the best scores. Let's go ahead and get all of 
-        # the actions pac-man can make ('legalMoves')
-        legalMoves = gameState.getLegalActions(self.index)
-
-        # update what will be teh agentIndex parameter for the cal to our 'value' function
-        newIndex = (self.index + 1) % numAgents
-
         # assosciate each of the legal actions with their score, and then pick the max of the scores 
         # and returning the action 
-        scores = [(action, value(gameState.generateSuccessor(0, action), newIndex, 1)) for action in legalMoves]
+        scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, 1)) for action in legalMoves]
         bestMove = max(scores, key = lambda t: t[1])[0]
         return bestMove
 
