@@ -131,56 +131,48 @@ class MinimaxAgent(MultiAgentSearchAgent):
         
         "*** YOUR CODE HERE ***"
 
+        # get number of agents 
         numAgents = gameState.getNumAgents()
 
-        # Trying to implement the dispatch recursive minimax algorithm to account for multiple ghosts
-        # itera is just used to keep track of the depth we are meant to go to
-        # the agentIndex increments so we can get movements through each ghost and PacMan
-        def value(action, state, agentIndex, itera):
+        def value(state, agentIndex, itera):
             # update agentIndex 
             agentIndex = agentIndex % numAgents
-            # check if we have valid moves (if there are no legal actions for this agent index)
+            
+            # check if we can ~make moves~ 
             if itera == (self.depth * numAgents) or not(state.getLegalActions(agentIndex)):
-              return (action, self.evaluationFunction(state))
+              return (self.evaluationFunction(state))
             if agentIndex == 0:
-              return maxValue(action, state, agentIndex, itera)
+              return maxValue(state, agentIndex, itera)
             else:
-              return minValue(action, state, agentIndex, itera)
+              return minValue(state, agentIndex, itera)
 
-
-        # This is kinda directly from the pseudocode which I think is just useless lmao
-        # def maxValue(state, agentIndex, itera):
-        #     v = float("-inf")
-        #     itera += 1
-        #     for action in state.getLegalActions(agentIndex):
-        #       v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
-        #       # print v
-        #     return v
-
-        # def minValue(state, agentIndex, itera):
-        #     v = float("inf")
-        #     itera += 1
-        #     for action in state.getLegalActions(agentIndex):
-        #       v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
-        #       # print v
-        #     return v
-
-        # I'm trying to get to a point where I can keep track of which move had the max score
-        def minValue(prevAction, state, agentIndex, itera):
-            v = ('Stop', float('inf'))
-            itera += 1
+        def minValue(state, agentIndex, itera):
+            v = float('inf')
+            itera += 1 
             for action in state.getLegalActions(agentIndex):
-              v = min(v, value(action, state.generateSuccessor(agentIndex, action), agentIndex + 1, itera), key = lambda t: t[1])
+              v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
             return v
 
-        def maxValue(prevAction, state, agentIndex, itera):
-            v = ('Stop', float('-inf'))
+        def maxValue(state, agentIndex, itera):
+            v = float('-inf')
             itera += 1
             for action in state.getLegalActions(agentIndex):
-              v = max(v, value(action, state.generateSuccessor(agentIndex, action), agentIndex + 1, itera), key = lambda t: t[1])
+              v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
             return v
 
-        return value('Stop', gameState, 0, 0)[0]
+        # What do we care about? We want to know which pac-man action returned 
+        # the move with the best scores. Let's go ahead and get all of 
+        # the actions pac-man can make ('legalMoves')
+        legalMoves = gameState.getLegalActions(self.index)
+
+        # update what will be teh agentIndex parameter for the cal to our 'value' function
+        newIndex = (self.index + 1) % numAgents
+
+        # assosciate each of the legal actions with their score, and then pick the max of the scores 
+        # and returning the action 
+        scores = [(action, value(gameState.generateSuccessor(0, action), newIndex, 1)) for action in legalMoves]
+        bestMove = max(scores, key = lambda t: t[1])[0]
+        return bestMove
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
