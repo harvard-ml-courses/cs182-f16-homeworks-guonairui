@@ -136,15 +136,18 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Trying to implement the dispatch recursive minimax algorithm to account for multiple ghosts
         # itera is just used to keep track of the depth we are meant to go to
         # the agentIndex increments so we can get movements through each ghost and PacMan
-
-        def value(state, agentIndex, itera):
-            if itera == (self.depth * numAgents):
-              return (action, self.evaluationFunction(state))
+        def value(action, state, agentIndex, itera):
+            # update agentIndex 
             agentIndex = agentIndex % numAgents
+            # check if we have valid moves (if there are no legal actions for this agent index)
+            if itera == (self.depth * numAgents) or not(state.getLegalActions(agentIndex)):
+              return (action, self.evaluationFunction(state))
             if agentIndex == 0:
-              return maxValue(state, agentIndex, itera)
+              return maxValue(action, state, agentIndex, itera)
             else:
-              return minValue(state, agentIndex, itera)
+              return minValue(action, state, agentIndex, itera)
+
+
         # This is kinda directly from the pseudocode which I think is just useless lmao
         # def maxValue(state, agentIndex, itera):
         #     v = float("-inf")
@@ -163,23 +166,21 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #     return v
 
         # I'm trying to get to a point where I can keep track of which move had the max score
-        def minValue(state, agentIndex, itera):
-            values = []
+        def minValue(prevAction, state, agentIndex, itera):
+            v = ('Stop', float('inf'))
             itera += 1
             for action in state.getLegalActions(agentIndex):
-              values += [(action, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))]
-            return min(values, key = lambda t: t[1])
+              v = min(v, value(action, state.generateSuccessor(agentIndex, action), agentIndex + 1, itera), key = lambda t: t[1])
+            return v
 
-        def maxValue(state, agentIndex, itera):
-            values = []
+        def maxValue(prevAction, state, agentIndex, itera):
+            v = ('Stop', float('-inf'))
             itera += 1
             for action in state.getLegalActions(agentIndex):
-              values += [(action, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))]
-            return max(values, key = lambda t: t[1])
+              v = max(v, value(action, state.generateSuccessor(agentIndex, action), agentIndex + 1, itera), key = lambda t: t[1])
+            return v
 
-        value(gameState, 0, 0)
-
-        return 'Stop'
+        return value('Stop', gameState, 0, 0)[0]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
