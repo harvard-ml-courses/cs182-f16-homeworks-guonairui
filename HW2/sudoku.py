@@ -83,10 +83,11 @@ class Sudoku:
         """
         # raise NotImplementedError()
 
-        for i in range(9):
-            for variable in row(i):
+        for row in range(len(self.board)): 
+            for i, variable in enumerate(row):
                 if variable == 0:
-                    return (i, list.index(0))
+                    return (i, row.index(0))
+        return None
 
     def complete(self):
         """
@@ -94,19 +95,21 @@ class Sudoku:
         Returns true if the assignment is complete. 
         """
         # raise NotImplementedError()
-
-        for i in range(9):
-            if len(set(row(i))) != 9 or len(set(col(i))) != 9 or len(set(box(i))) != 9:
-                return False
-
-        return True
+        return (firstEpsilonVariable is None)
 
     def variableDomain(self, r, c):
         """
         IMPLEMENT FOR PART 1
         Returns current domain for the (row, col) variable .
         """
-        raise NotImplementedError()
+        # i don't understand what it wan
+        domain = set([1,2,3,4,5,6,7,8,9])
+        checks = [self.row(r), self.col(c), self.box(self.box_id(r,c))]
+        for check in checks: 
+            for var in check: 
+                if var in domain: 
+                    domain.remove(var)
+        return list(domain)
 
         
 
