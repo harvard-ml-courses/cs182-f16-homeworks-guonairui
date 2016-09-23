@@ -83,10 +83,10 @@ class Sudoku:
         """
         # raise NotImplementedError()
 
-        for row in range(len(self.board)): 
-            for i, variable in enumerate(row):
+        for i in range(len(self.board)): 
+            for _, variable in enumerate(self.row(i)):
                 if variable == 0:
-                    return (i, row.index(0))
+                    return (i, self.row(i).index(0))
         return None
 
     def complete(self):
@@ -95,7 +95,7 @@ class Sudoku:
         Returns true if the assignment is complete. 
         """
         # raise NotImplementedError()
-        return (firstEpsilonVariable is None)
+        return (self.firstEpsilonVariable() is None)
 
     def variableDomain(self, r, c):
         """
@@ -111,7 +111,6 @@ class Sudoku:
                     domain.remove(var)
         return list(domain)
 
-        
 
     # PART 2
     def updateFactor(self, factor_type, i):
