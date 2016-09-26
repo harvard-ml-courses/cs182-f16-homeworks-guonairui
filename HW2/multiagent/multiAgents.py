@@ -18,6 +18,9 @@ import random, util
 
 from game import Agent
 
+alpha = float('-inf')
+beta = float('inf')
+
 class ReflexAgent(Agent):
     """
       A reflex agent chooses an action at each choice point by examining
@@ -195,7 +198,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # update what will be teh agentIndex parameter for the cal to our 'value' function
         newIndex = (self.index + 1) % numAgents
 
-        def value(state, agentIndex, alpha, beta, itera):
+        alpha = float('-inf')
+        beta = float('inf')
+
+        def value(state, agentIndex, itera):
             # update agentIndex 
             agentIndex = agentIndex % numAgents
             
@@ -203,25 +209,29 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
               return self.evaluationFunction(state)
             if agentIndex == self.index:
-              return maxValue(state, agentIndex, alpha, beta, itera)
+              return maxValue(state, agentIndex, itera)
             else:
-              return minValue(state, agentIndex, alpha, beta, itera)
+              return minValue(state, agentIndex, itera)
 
-        def minValue(state, agentIndex, alpha, beta, itera):
+        def minValue(state, agentIndex, itera):
             v = float('inf')
             itera += 1 
+            global alpha
+            global beta
             for action in state.getLegalActions(agentIndex):
-              v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, alpha, beta, itera))
+              v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
               if v < alpha:
                 return v
               beta = min(beta, v)
             return v
 
-        def maxValue(state, agentIndex, alpha, beta, itera):
+        def maxValue(state, agentIndex, itera):
             v = float('-inf')
             itera += 1
+            global alpha
+            global beta
             for action in state.getLegalActions(agentIndex):
-              v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, alpha, beta, itera))
+              v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
               if v > beta:
                 return v
               alpha = max(alpha, v)
@@ -229,7 +239,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         # associate each of the legal actions with their score, and then pick the max of the scores 
         # and returning the action 
-        scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, float('-inf'), float('inf'), 1)) for action in legalMoves]
+        scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, 1)) for action in legalMoves]
         bestMove = max(scores, key = lambda t: t[1])[0]
         return bestMove
 
