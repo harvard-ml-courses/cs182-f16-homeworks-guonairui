@@ -40,6 +40,9 @@ class Sudoku:
         if isFirstLocal:
             self._initLocalSearch()
 
+        # added this for cleaner code 
+        self.factor_dict = {'BOX': lambda b: self.box(b), 'COL': lambda c: self.col(c), 'ROW': lambda r: self.row(r)}
+
     # BASE SUDOKU CODE
     def row(self, row):
         "The variable assignments for a row factor."
@@ -102,14 +105,14 @@ class Sudoku:
         IMPLEMENT FOR PART 1
         Returns current domain for the (row, col) variable .
         """
-        # i don't understand what it wan
+        # i don't understand what it wants here but i'm using a set
         domain = set([1,2,3,4,5,6,7,8,9])
         checks = [self.row(r), self.col(c), self.box(self.box_id(r,c))]
         for check in checks: 
             for var in check: 
                 if var in domain: 
                     domain.remove(var)
-        return list(domain)
+        return domain
 
 
     # PART 2
@@ -120,14 +123,30 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL 
         `i` is an index between 0 and 8.
         """
-        raise NotImplementedError()
-        # values = []
-        # if factor_type == BOX:
-            
-        # if factor_type == ROW:
-            
-        # if factor_type == COL:
-            
+        mistakes = 0
+        values = self.factor_dict[factor_type](i)
+        tup = (factor_type, i)
+
+        # check each factor type, counting mistakes and destructively updating the domain
+        # as we go (unclear if this is what they want, this spec is really poorly written
+        # and honestly i'm a little confused )
+        if factor_type == 'ROW':
+            for col_idx in range(len(self.board[0])): 
+                mistakes += count_mistakes(values, self.variableDomain(i, col_idx))
+        elif factor_type == 'COL': 
+            for row_idx in range(self(self.board)): 
+                mistakes += count_mistakes(values, self.variableDomain(row_idx, i))
+        else: # factor type is box  
+            row = i / 3
+            col = i % 3
+            for x in xrange(row * 3, row * 3 + 3):
+                for y in xrange(col * 3, col * 3 + 3):
+                    mistakes += count_mistakes(values, self.board[x][y]))
+       
+  
+        self.factorRemaining(tup) = values
+        self.factorNumConflicts(tup) = mistakes 
+        return 
         
     def updateAllFactors(self):
         """
@@ -135,14 +154,22 @@ class Sudoku:
         Update the values remaining for all factors.
         There is one factor for each row, column, and box.
         """
-        raise NotImplementedError()
+        for i in range(len(self.board)): 
+            for factor in self.factor_dict.keys(): 
+                self.updateFactor(factor, i)
+        return 
 
     def updateVariableFactors(self, variable):
         """
         IMPLEMENT FOR PART 2
         Update all the factors impacting a variable (neighbors in factor graph).
         """
-        raise NotImplementedError()
+
+        row, col = variable 
+        self.updateFactor('ROW', row)
+        self.updateFactor('COL', col)
+        self.updateFactor('BOX', self.box_id(row, col))
+        return 
 
     # CSP SEARCH CODE
     def nextVariable(self):
@@ -160,8 +187,12 @@ class Sudoku:
         IMPLEMENT IN PART 3
         Returns new assignments with each possible value 
         assigned to the variable returned by `nextVariable`.
-        """
-        raise NotImplementedError()
+        """ 
+        if self.complete(): 
+            return 
+        var = self.firstEpsilonVariable()
+
+
 
     def getAllSuccessors(self):
         if not args.forward: 
