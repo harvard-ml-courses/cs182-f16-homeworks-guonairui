@@ -132,16 +132,16 @@ class Sudoku:
         # and honestly i'm a little confused )
         if factor_type == 'ROW':
             for col_idx in range(len(self.board[0])): 
-                mistakes += count_mistakes(values, self.variableDomain(i, col_idx))
+                mistakes += crossOff(values, self.variableDomain(i, col_idx))
         elif factor_type == 'COL': 
             for row_idx in range(self(self.board)): 
-                mistakes += count_mistakes(values, self.variableDomain(row_idx, i))
+                mistakes += crossOff(values, self.variableDomain(row_idx, i))
         else: # factor type is box  
             row = i / 3
             col = i % 3
             for x in xrange(row * 3, row * 3 + 3):
                 for y in xrange(col * 3, col * 3 + 3):
-                    mistakes += count_mistakes(values, self.board[x][y]))
+                    mistakes += crossOff(values, self.board[x][y]))
        
   
         self.factorRemaining(tup) = values
@@ -154,7 +154,7 @@ class Sudoku:
         Update the values remaining for all factors.
         There is one factor for each row, column, and box.
         """
-        for i in range(len(self.board)): 
+        for i in xrange(len(self.board)): 
             for factor in self.factor_dict.keys(): 
                 self.updateFactor(factor, i)
         return 
@@ -191,6 +191,7 @@ class Sudoku:
         if self.complete(): 
             return 
         var = self.firstEpsilonVariable()
+
 
 
 
