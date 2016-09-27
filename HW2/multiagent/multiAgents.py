@@ -187,20 +187,32 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        # Get the number of agents
         numAgents = gameState.getNumAgents()
 
+        # Using the dispatch implementation of minimax to deal with multiple ghosts
         def value(state, alpha, beta, itera):
+            # Update agentIndex based on number of iteration loops
             agentIndex = itera % numAgents
+
+            # If at max depth or no legal moves, return evaluation function
             if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
               return ('Stop', self.evaluationFunction(state))
+
+            # If we are pacman, do max, if not do min
             if agentIndex == self.index:
               return maxValue(state, alpha, beta, itera)
             else:
               return minValue(state, alpha, beta, itera)
 
         def minValue(state, alpha, beta, itera):
+            # Update agentIndex based on number of iteration loops
             agentIndex = itera % numAgents
+
+            # Initialize minimum as infinity
             v = ('Stop', float('inf'))
+
+            # For all legal actions, loop through and update min, alpha, and beta accordingly
             for action in state.getLegalActions(agentIndex):
               nextAction, nextValue = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
               if nextValue < v[1]:
@@ -211,8 +223,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return v
 
         def maxValue(state, alpha, beta, itera):
+            # Update agentIndex based on number of iteration loops
             agentIndex = itera % numAgents
+
+            # Initialize minimum as negative infinity
             v = ('Stop', float('-inf'))
+
+            # For all legal actions, loop through and update min, alpha, and beta accordingly
             for action in state.getLegalActions(agentIndex):
               nextAction, nextValue = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
               if nextValue > v[1]:
@@ -222,6 +239,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
               alpha = max(alpha, v[1])
             return v
 
+        # Use the value function to find best move
         bestMove = value(gameState, float('-inf'), float('inf'), 0)
         return bestMove[0]
 
