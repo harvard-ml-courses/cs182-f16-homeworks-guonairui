@@ -98,7 +98,7 @@ class Sudoku:
         Returns true if the assignment is complete. 
         """
         # raise NotImplementedError()
-        return (self.firstEpsilonVariable() is None)
+        return self.firstEpsilonVariable() is None
 
     def variableDomain(self, r, c):
         """
@@ -182,29 +182,8 @@ class Sudoku:
         Returns new assignments with each possible value 
         assigned to the variable returned by `nextVariable`.
         """ 
-        def recursive_helper(sudoku_board, lst):
-            # if the board is complete, add the sudo_board to our list
-            # (base case)
-            if sudoku_board.complete(): 
-                lst.append(sudoku_board)
-                return
-            else: 
-                # find next row, col
-                row, col = sudoku_board.firstEpsilonVariable()
-                # get variable domain for row, col
-                domain = sudoku_board.variableDomain(row, col)
-                # if the domain is not None, we recursively call the function, 
-                # otherwise we just return because we haven't found a solution
-                if domain is not None: 
-                    for var in domain:
-                        sudoku_board = sudoku_board.setVariable(row, col, var)
-                        recursive_helper(sudoku_board, lst)
-                return
-
-        lst = []
-        recursive_helper(self, lst)
-        return lst
-
+        row, col = self.firstEpsilonVariable()
+        return [self.setVariable(row, col, var) for var in self.variableDomain(row,col)]
 
 
     def getAllSuccessors(self):
@@ -221,38 +200,17 @@ class Sudoku:
         """
         IMPLEMENT IN PART 4
         Returns true if all variables have non-empty domains.
-        """
-        def check_domains(sudoku_board, r, c): 
-            checks = [sudoku_board.row(r), sudoku_board.col(c), sudoku_board.box(sudoku_board.box_id(r,c))]
-            for factor in checks: 
-                for elt in factor: 
-                    if elt is None and sudoku_board.variableDomain is None: 
-                        return False 
-            return True 
+         """
+        def is_valid(sudoku_board, r, c): 
+            # if variable is assigned and domain is empty -> True 
+            # if variable is not assigned and domain is empty -> False
+            # if variable is assigned and domain is not empty -> True 
+            # if variable is not assigned and domain is not empty -> True
+            return sudoku_board.board[r][c] or len(sudoku_board.variableDomain(r,c))
 
+        # all unassigned variables should have non-empty domains, if they don't it's not valid
+        return all(is_valid(self, r, c) for r in range(len(self.board)) for c in range(len(self.board[0])))
 
-        def recursive_helper(sudoku_board, lst):
-            # if the board is complete, add the sudo_board to our list
-            # (base case)
-            if sudoku_board.complete(): 
-                lst.append(sudoku_board)
-                return
-            else: 
-                # find next row, col
-                row, col = sudoku_board.firstEpsilonVariable()
-                # get variable domain for row, col
-                domain = sudoku_board.variableDomain(row, col)
-                # if the domain is not None, we recursively call the function, 
-                # otherwise we just return because we haven't found a solution
-                if check_domains(r,c) is not None: 
-                    for var in domain:
-                        sudoku_board = sudoku_board.setVariable(row, col, var)
-                        recursive_helper(sudoku_board, lst)
-                return
-
-        lst = []
-        recursive_helper(self, lst)
-        return lst
 
     # LOCAL SEARCH CODE
     # Fixed variables cannot be changed by the player.
