@@ -41,7 +41,7 @@ class Sudoku:
             self._initLocalSearch()
 
         # added this for cleaner code 
-        self.factor_dict = {'BOX': lambda b: self.box(b), 'COL': lambda c: self.col(c), 'ROW': lambda r: self.row(r)}
+        self.factor_dict = {BOX: lambda b: self.box(b), COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
 
     # BASE SUDOKU CODE
     def row(self, row):
@@ -123,29 +123,23 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL 
         `i` is an index between 0 and 8.
         """
-        mistakes = 0
+
         values = self.factor_dict[factor_type](i)
         tup = (factor_type, i)
+        def fix(values): 
+            seen = set([])
+            mistakes = 0
+            for idx, val in enumerate(values): 
+                if val is None: 
+                    mistakes += 1 
+                if val in seen: 
+                    mistakes += 1 
+                seen.add(val)
+            return mistakes, [None if elt in seen else elt for elt in [elt for elt in range(1,10)]]
 
-        # check each factor type, counting mistakes and destructively updating the domain
-        # as we go (unclear if this is what they want, this spec is really poorly written
-        # and honestly i'm a little confused )
-        if factor_type == 'ROW':
-            for col_idx in range(len(self.board[0])): 
-                mistakes += crossOff(values, self.variableDomain(i, col_idx))
-        elif factor_type == 'COL': 
-            for row_idx in range(self(self.board)): 
-                mistakes += crossOff(values, self.variableDomain(row_idx, i))
-        else: # factor type is box  
-            row = i / 3
-            col = i % 3
-            for x in xrange(row * 3, row * 3 + 3):
-                for y in xrange(col * 3, col * 3 + 3):
-                    mistakes += crossOff(values, self.board[x][y]))
-       
-  
-        self.factorRemaining(tup) = values
-        self.factorNumConflicts(tup) = mistakes 
+        mistakes, vals = fix(values)
+        self.factorRemaining[tup] = vals
+        self.factorNumConflicts[tup] = mistakes 
         return 
         
     def updateAllFactors(self):
@@ -188,10 +182,28 @@ class Sudoku:
         Returns new assignments with each possible value 
         assigned to the variable returned by `nextVariable`.
         """ 
-        if self.complete(): 
-            return 
-        var = self.firstEpsilonVariable()
+        def recursive_helper(sudoku_board, lst):
+            # if the board is complete, add the sudo_board to our list
+            # (base case)
+            if sudoku_board.complete(): 
+                lst.append(sudoku_board)
+                return
+            else: 
+                # find next row, col
+                row, col = sudoku_board.firstEpsilonVariable()
+                # get variable domain for row, col
+                domain = sudoku_board.variableDomain(row, col)
+                # if the domain is not None, we recursively call the function, 
+                # otherwise we just return because we haven't found a solution
+                if domain is not None: 
+                    for var in domain:
+                        sudoku_board = sudoku_board.setVariable(row, col, var)
+                        recursive_helper(sudoku_board, lst)
+                return
 
+        lst = []
+        recursive_helper(self, lst)
+        return lst
 
 
 
@@ -210,7 +222,37 @@ class Sudoku:
         IMPLEMENT IN PART 4
         Returns true if all variables have non-empty domains.
         """
-        raise NotImplementedError()
+        def check_domains(sudoku_board, r, c): 
+            checks = [sudoku_board.row(r), sudoku_board.col(c), sudoku_board.box(sudoku_board.box_id(r,c))]
+            for factor in checks: 
+                for elt in factor: 
+                    if elt is None and sudoku_board.variableDomain is None: 
+                        return False 
+            return True 
+
+
+        def recursive_helper(sudoku_board, lst):
+            # if the board is complete, add the sudo_board to our list
+            # (base case)
+            if sudoku_board.complete(): 
+                lst.append(sudoku_board)
+                return
+            else: 
+                # find next row, col
+                row, col = sudoku_board.firstEpsilonVariable()
+                # get variable domain for row, col
+                domain = sudoku_board.variableDomain(row, col)
+                # if the domain is not None, we recursively call the function, 
+                # otherwise we just return because we haven't found a solution
+                if check_domains(r,c) is not None: 
+                    for var in domain:
+                        sudoku_board = sudoku_board.setVariable(row, col, var)
+                        recursive_helper(sudoku_board, lst)
+                return
+
+        lst = []
+        recursive_helper(self, lst)
+        return lst
 
     # LOCAL SEARCH CODE
     # Fixed variables cannot be changed by the player.
