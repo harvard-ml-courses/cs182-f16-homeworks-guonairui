@@ -202,9 +202,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             agentIndex = itera % numAgents
             v = ('Stop', float('inf'))
             for action in state.getLegalActions(agentIndex):
-              nextMove = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
-              if nextMove[1] < v[1]:
-                v = (action, nextMove[1])
+              nextAction, nextValue = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
+              if nextValue < v[1]:
+                v = (action, nextValue)
               if v[1] < alpha:
                 return v
               beta = min(beta, v[1])
@@ -214,9 +214,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             agentIndex = itera % numAgents
             v = ('Stop', float('-inf'))
             for action in state.getLegalActions(agentIndex):
-              nextMove = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
-              if nextMove[1] > v[1]:
-                v = (action, nextMove[1])
+              nextAction, nextValue = value(state.generateSuccessor(agentIndex, action), alpha, beta, itera + 1)
+              if nextValue > v[1]:
+                v = (action, nextValue)
               if v[1] > beta:
                 return v
               alpha = max(alpha, v[1])
