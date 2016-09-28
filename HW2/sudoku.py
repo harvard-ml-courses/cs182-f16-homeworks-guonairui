@@ -40,8 +40,6 @@ class Sudoku:
         if isFirstLocal:
             self._initLocalSearch()
 
-        # added this for cleaner code 
-        self.factor_dict = {BOX: lambda b: self.box(b), COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
 
     # BASE SUDOKU CODE
     def row(self, row):
@@ -106,13 +104,10 @@ class Sudoku:
         Returns current domain for the (row, col) variable .
         """
         # i don't understand what it wants here but i'm using a set
-        domain = set([1,2,3,4,5,6,7,8,9])
-        checks = [self.row(r), self.col(c), self.box(self.box_id(r,c))]
-        for check in checks: 
-            for var in check: 
-                if var in domain: 
-                    domain.remove(var)
-        return domain
+        domain = list(range(1,10))
+        checks = set(self.row(r) + self.col(c) + self.box(self.box_id(r,c)))
+        filter(lambda elt: elt not in checks, domain)
+        return set(domain)
 
 
     # PART 2
@@ -123,8 +118,8 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL 
         `i` is an index between 0 and 8.
         """
-
-        values = self.factor_dict[factor_type](i)
+        factor_dict = {BOX: lambda b: self.box(b), COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
+        values = factor_dict[factor_type](i)
         tup = (factor_type, i)
         def fix(values): 
             seen = set([])
@@ -149,7 +144,7 @@ class Sudoku:
         There is one factor for each row, column, and box.
         """
         for i in xrange(len(self.board)): 
-            for factor in self.factor_dict.keys(): 
+            for factor in [ROW, BOX, COL]: 
                 self.updateFactor(factor, i)
         return 
 
@@ -160,9 +155,9 @@ class Sudoku:
         """
 
         row, col = variable 
-        self.updateFactor('ROW', row)
-        self.updateFactor('COL', col)
-        self.updateFactor('BOX', self.box_id(row, col))
+        self.updateFactor(ROW, row)
+        self.updateFactor(COL, col)
+        self.updateFactor(BOX, self.box_id(row, col))
         return 
 
     # CSP SEARCH CODE
@@ -254,8 +249,30 @@ class Sudoku:
         with all the row factors being held consistent. 
         Should call `updateAllFactors` at end.
         """
-        raise NotImplementedError()
-        # self.updateAllFactors()
+        board = [[0 for _ in range(len(self.board[0]))] for _ in range(len(self.board))]
+        row_fixed = {}
+        for k, v in self.fixedVariables.iteritems(): 
+            r, c = k
+            if v:    
+                if r in row_fixed: 
+                    row_fixed[r].add(self.board[r][c])
+                else: 
+                    row_fixed[r] = set([self.board[r][c]])
+            
+        for row_idx in range(len(self.board)): 
+            seen = set([])
+            if row_idx in row_fixed: 
+                seen = row_fixed[row_idx]
+            for col_idx in range(len(self.board[0])):
+                if (row_idx, col_idx) not in self.fixedVariables: 
+                    new_elt = random.choice(filter(lambda elt: elt not in seen, list(range(1,10))))
+                    board[row_idx][col_idx] = new_elt
+                    seen.add(new_elt)
+                else: 
+                    board[row_idx][col_idx] = self.board[row_idx][col_idx]
+        self.board = board
+        self.updateAllFactors()
+        return 
     
     # PART 6
     def randomSwap(self):
@@ -264,16 +281,27 @@ class Sudoku:
         Returns two random variables that can be swapped without
         causing a row factor conflict.
         """
-        raise NotImplementedError()
+        idx = random.randrange(9)
+        var1_col = random.randrange(9)
+        while (idx, var1_col) in self.fixedVariables: 
+            idx = random.randrange(9)
+            var1_col = random.randrange(9)
+        var2_col = random.randrange(9)
+        while var2_col == var1_col and (idx, var2_col) in self.fixedVariables: 
+            var2_col = random.randrange(9)
+        return (idx, var1_col), (idx, var2_col)
       
 
     # PART 7
     def gradientDescent(self, variable1, variable2):
-        """
-        IMPLEMENT FOR PART 7
-        Decide if we should swap the values of variable1 and variable2.
-        """
-        raise NotImplementedError()
+        original_conflicts = self.numConflicts()
+        self.modifySwap(variable1, variable2)
+        new_conflicts = self.numConflicts() 
+        if new_conflicts > original_conflicts:
+            self.modifySwap(self.lastMoves[0], self.lastMoves[1])
+        return
+        # return self.gradientDescent(v1, v2)
+
 
         
     ### IGNORE - PRINTING CODE
