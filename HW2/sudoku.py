@@ -84,6 +84,7 @@ class Sudoku:
         """
         # raise NotImplementedError()
 
+        # Iterate through grid and return coordinates of first 0
         for i in range(len(self.board)): 
             for _, variable in enumerate(self.row(i)):
                 if not variable:
@@ -95,7 +96,6 @@ class Sudoku:
         IMPLEMENT FOR PART 1
         Returns true if the assignment is complete. 
         """
-        # raise NotImplementedError()
         return self.firstEpsilonVariable() is None
 
     def variableDomain(self, r, c):
@@ -103,7 +103,7 @@ class Sudoku:
         IMPLEMENT FOR PART 1
         Returns current domain for the (row, col) variable .
         """
-        # i don't understand what it wants here but i'm using a set
+        # Iterate through removing values from the set domain
         domain = list(range(1,10))
         for check in [self.row(r), self.col(c), self.box(self.box_id(r,c))]:
             for var in check: 
@@ -151,6 +151,7 @@ class Sudoku:
         Update the values remaining for all factors.
         There is one factor for each row, column, and box.
         """
+        # Iterate through, update all factors
         for i in xrange(len(self.board)): 
             for factor in [ROW, BOX, COL]: 
                 self.updateFactor(factor, i)
@@ -161,6 +162,7 @@ class Sudoku:
         IMPLEMENT FOR PART 2
         Update all the factors impacting a variable (neighbors in factor graph).
         """
+        # Update factors impacting a variable
         row, col = variable 
         self.updateFactor(ROW, row)
         self.updateFactor(COL, col)
@@ -184,6 +186,7 @@ class Sudoku:
         Returns new assignments with each possible value 
         assigned to the variable returned by `nextVariable`.
         """ 
+        # Return a list of sudoku with new assignments
         row, col = self.firstEpsilonVariable()
         return [self.setVariable(row, col, var) for var in self.variableDomain(row,col)]
 
@@ -317,7 +320,9 @@ class Sudoku:
     def gradientDescent(self, variable1, variable2):
         original_conflicts = self.numConflicts()
         self.modifySwap(variable1, variable2)
-        new_conflicts = self.numConflicts() 
+        new_conflicts = self.numConflicts()
+
+        # Go back an iteration if the conflicts are worse, or stay if they are better.
         if new_conflicts > original_conflicts and random.randrange(1000) >= 1:
             self.modifySwap(self.lastMoves[0], self.lastMoves[1])
         return

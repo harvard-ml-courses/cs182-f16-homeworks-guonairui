@@ -134,15 +134,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
         
         "*** YOUR CODE HERE ***"
 
-        # get number of agents 
+        # Get number of agents
         numAgents = gameState.getNumAgents()
 
+
+        # Implement the Dispatch variation of minimax algorithm
+        # so we can have multiple min levels
         def value(state, itera):
-            # update agentIndex 
             agentIndex = itera % numAgents
             
-            # check if we can ~make moves~ 
             if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
+              # Use tuples to represent actions towards states
               return ('Stop', self.evaluationFunction(state))
             if agentIndex == self.index:
               return maxValue(state, itera)
@@ -151,6 +153,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         def minValue(state, itera):
             agentIndex = itera % numAgents
+
             v = ('Stop', float('inf'))
             for action in state.getLegalActions(agentIndex):
               successor = state.generateSuccessor(agentIndex, action)
@@ -169,8 +172,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 v = (action, nextValue)
             return v
 
-        # associate each of the legal actions with their score, and then pick the max of the scores 
-        # and returning the action
         bestMove = value(gameState, 0)
         return bestMove[0]
 
@@ -288,8 +289,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 v = (action, nextValue)
             return v
 
-        # associate each of the legal actions with their score, and then pick the max of the scores 
-        # and returning the action 
         bestMove = value(gameState, 0)
         return bestMove[0]
 
