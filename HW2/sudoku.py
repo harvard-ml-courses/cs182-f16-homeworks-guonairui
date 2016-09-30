@@ -86,7 +86,7 @@ class Sudoku:
 
         for i in range(len(self.board)): 
             for _, variable in enumerate(self.row(i)):
-                if variable == 0:
+                if not variable:
                     return (i, self.row(i).index(0))
         return None
 
@@ -105,8 +105,10 @@ class Sudoku:
         """
         # i don't understand what it wants here but i'm using a set
         domain = list(range(1,10))
-        checks = set(self.row(r) + self.col(c) + self.box(self.box_id(r,c)))
-        filter(lambda elt: elt not in checks, domain)
+        for check in [self.row(r), self.col(c), self.box(self.box_id(r,c))]:
+            for var in check: 
+                if var in domain: 
+                    domain.remove(var)
         return set(domain)
 
 
@@ -118,22 +120,17 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL 
         `i` is an index between 0 and 8.
         """
-        factor_dict = {BOX: lambda b: self.box(b), COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
+        factor_dict = {BOX: lambda b: self.box(b), 
+            COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
+
+        # get the values
         values = factor_dict[factor_type](i)
         tup = (factor_type, i)
-        def fix(values): 
-            seen = set([])
-            mistakes = 0
-            for idx, val in enumerate(values): 
-                if val is None: 
-                    mistakes += 1 
-                if val in seen: 
-                    mistakes += 1 
-                seen.add(val)
-            return mistakes, [None if elt in seen else elt for elt in [elt for elt in range(1,10)]]
-
-        mistakes, vals = fix(values)
-        self.factorRemaining[tup] = vals
+ 
+        # update everything 
+        domain = [x for x in range(1,10)]
+        mistakes = crossOff(values, domain)
+        self.factorRemaining[tup] = values
         self.factorNumConflicts[tup] = mistakes 
         return 
         
@@ -153,7 +150,6 @@ class Sudoku:
         IMPLEMENT FOR PART 2
         Update all the factors impacting a variable (neighbors in factor graph).
         """
-
         row, col = variable 
         self.updateFactor(ROW, row)
         self.updateFactor(COL, col)
@@ -249,27 +245,41 @@ class Sudoku:
         with all the row factors being held consistent. 
         Should call `updateAllFactors` at end.
         """
-        board = [[0 for _ in range(len(self.board[0]))] for _ in range(len(self.board))]
+        # lambda functions and variables in desperate attempt to clean this code
+        lngth = lambda board: range(len(board))
+        filter_seen = lambda seen, lst: filter(lambda elt: elt not in seen, lst)
+        fv = self.fixedVariables
+
+        # new board 
+        board = [[0 for _ in lngth(self.board)] for _ in lngth(self.board)]
+
+        # this was supposed to make things easier but I think that 
+        # it made things more complicated --
+        # row_fixed: dictionary mapping row indices to sets of fixed variables
+        # that we can't assign, for constant lookup time
         row_fixed = {}
-        for k, v in self.fixedVariables.iteritems(): 
-            r, c = k
+        for (r,c), v in fv.iteritems(): 
             if v:    
                 if r in row_fixed: 
                     row_fixed[r].add(self.board[r][c])
                 else: 
                     row_fixed[r] = set([self.board[r][c]])
-            
-        for row_idx in range(len(self.board)): 
+        
+        # iterate over the board, randomly choosing available variables 
+        # for slots 
+        for row_idx in lngth(self.board): 
             seen = set([])
             if row_idx in row_fixed: 
                 seen = row_fixed[row_idx]
-            for col_idx in range(len(self.board[0])):
-                if (row_idx, col_idx) not in self.fixedVariables: 
-                    new_elt = random.choice(filter(lambda elt: elt not in seen, list(range(1,10))))
+            for col_idx in lngth(self.board):
+                if (row_idx, col_idx) not in fv: 
+                    new_elt = random.choice(filter_seen(seen, list(range(1,10))))
                     board[row_idx][col_idx] = new_elt
                     seen.add(new_elt)
                 else: 
                     board[row_idx][col_idx] = self.board[row_idx][col_idx]
+
+        # assign board and update factors
         self.board = board
         self.updateAllFactors()
         return 
@@ -594,6 +604,5 @@ def doc(fn):
     
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
-
 
 
