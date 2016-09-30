@@ -137,45 +137,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # get number of agents 
         numAgents = gameState.getNumAgents()
 
-        # What do we care about? We want to know which pac-man action returned 
-        # the move with the best scores. Let's go ahead and get all of 
-        # the actions pac-man can make ('legalMoves')
-        legalMoves = gameState.getLegalActions(self.index)
-
-        # update what will be teh agentIndex parameter for the cal to our 'value' function
-        newIndex = (self.index + 1) % numAgents
-
-        def value(state, agentIndex, itera):
+        def value(state, itera):
             # update agentIndex 
-            agentIndex = agentIndex % numAgents
+            agentIndex = itera % numAgents
             
             # check if we can ~make moves~ 
             if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
-              return self.evaluationFunction(state)
+              return ('Stop', self.evaluationFunction(state))
             if agentIndex == self.index:
-              return maxValue(state, agentIndex, itera)
+              return maxValue(state, itera)
             else:
-              return minValue(state, agentIndex, itera)
+              return minValue(state, itera)
 
-        def minValue(state, agentIndex, itera):
-            v = float('inf')
-            itera += 1 
+        def minValue(state, itera):
+            agentIndex = itera % numAgents
+            v = ('Stop', float('inf'))
             for action in state.getLegalActions(agentIndex):
-              v = min(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
+              successor = state.generateSuccessor(agentIndex, action)
+              nextAction, nextValue = value(successor, itera + 1)
+              if nextValue < v[1]:
+                v = (action, nextValue)
             return v
 
-        def maxValue(state, agentIndex, itera):
-            v = float('-inf')
-            itera += 1
+        def maxValue(state, itera):
+            agentIndex = itera % numAgents
+            v = ('Stop', float('-inf'))
             for action in state.getLegalActions(agentIndex):
-              v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
+              successor = state.generateSuccessor(agentIndex, action)
+              nextAction, nextValue = value(successor, itera + 1)
+              if nextValue > v[1]:
+                v = (action, nextValue)
             return v
 
         # associate each of the legal actions with their score, and then pick the max of the scores 
-        # and returning the action 
-        scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, 1)) for action in legalMoves]
-        bestMove = max(scores, key = lambda t: t[1])[0]
-        return bestMove
+        # and returning the action
+        bestMove = value(gameState, 0)
+        return bestMove[0]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -259,47 +256,42 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # get number of agents 
         numAgents = gameState.getNumAgents()
 
-        # What do we care about? We want to know which pac-man action returned 
-        # the move with the best scores. Let's go ahead and get all of 
-        # the actions pac-man can make ('legalMoves')
-        legalMoves = gameState.getLegalActions(self.index)
-
-        # update what will be teh agentIndex parameter for the cal to our 'value' function
-        newIndex = (self.index + 1) % numAgents
-
-        def value(state, agentIndex, itera):
+        def value(state, itera):
             # update agentIndex 
-            agentIndex = agentIndex % numAgents
+            agentIndex = itera % numAgents
             
             # check if we can ~make moves~ 
             if itera == self.depth * numAgents or not state.getLegalActions(agentIndex):
-              return self.evaluationFunction(state)
+              return ('Stop', self.evaluationFunction(state))
             if agentIndex == self.index:
-              return maxValue(state, agentIndex, itera)
+              return maxValue(state, itera)
             else:
-              return expValue(state, agentIndex, itera)
+              return expValue(state, itera)
 
-        def expValue(state, agentIndex, itera):
-            v = 0
-            itera += 1 
+        def expValue(state, itera):
+            agentIndex = itera % numAgents
+            v = ('Stop', 0)
             actions = state.getLegalActions(agentIndex)
             for action in actions:
               p = 1 / float(len(actions))
-              v += p * value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera)
+              successor = value(state.generateSuccessor(agentIndex, action), itera + 1)
+              v = (action, (v[1] + (p * successor[1])))
             return v
 
-        def maxValue(state, agentIndex, itera):
-            v = float('-inf')
-            itera += 1
+        def maxValue(state, itera):
+            agentIndex = itera % numAgents
+            v = ('Stop', float('-inf'))
             for action in state.getLegalActions(agentIndex):
-              v = max(v, value(state.generateSuccessor(agentIndex, action), agentIndex + 1, itera))
+              successor = state.generateSuccessor(agentIndex, action)
+              nextAction, nextValue = value(successor, itera + 1)
+              if nextValue > v[1]:
+                v = (action, nextValue)
             return v
 
         # associate each of the legal actions with their score, and then pick the max of the scores 
         # and returning the action 
-        scores = [(action, value(gameState.generateSuccessor(self.index, action), newIndex, 1)) for action in legalMoves]
-        bestMove = max(scores, key = lambda t: t[1])[0]
-        return bestMove
+        bestMove = value(gameState, 0)
+        return bestMove[0]
 
 def betterEvaluationFunction(currentGameState):
     """
