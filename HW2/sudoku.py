@@ -307,7 +307,7 @@ class Sudoku:
         original_conflicts = self.numConflicts()
         self.modifySwap(variable1, variable2)
         new_conflicts = self.numConflicts() 
-        if new_conflicts > original_conflicts:
+        if new_conflicts > original_conflicts and random.randrange(1000) >= 1:
             self.modifySwap(self.lastMoves[0], self.lastMoves[1])
         return
         # return self.gradientDescent(v1, v2)
