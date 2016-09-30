@@ -8,6 +8,8 @@ BOX = 1
 ROW = 2
 COL = 3
 
+# Larry Guo and Gabbi Merz
+
 def crossOff(values, nums):
     """
     Removes seen nums from domain values.
