@@ -120,6 +120,18 @@ class Sudoku:
         `factor_type` is one of BOX, ROW, COL 
         `i` is an index between 0 and 8.
         """
+        def fix(values): 
+            # helper function cuz idk how to use CrossOff
+            seen = set([])
+            mistakes = 0
+            for idx, val in enumerate(values): 
+                if val is None: 
+                    mistakes += 1 
+                if val in seen: 
+                    mistakes += 1 
+                seen.add(val)
+            return mistakes, [None if x in seen else x for x in range(1,10)]
+        
         factor_dict = {BOX: lambda b: self.box(b), 
             COL: lambda c: self.col(c), ROW: lambda r: self.row(r)}
 
@@ -128,8 +140,7 @@ class Sudoku:
         tup = (factor_type, i)
  
         # update everything 
-        domain = [x for x in range(1,10)]
-        mistakes = crossOff(values, domain)
+        mistakes, values = fix(values)
         self.factorRemaining[tup] = values
         self.factorNumConflicts[tup] = mistakes 
         return 
