@@ -45,7 +45,6 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-
         oldvalues = util.Counter()
         for _ in xrange(iterations): 
           for s in mdp.getStates(): 
@@ -53,8 +52,6 @@ class ValueIterationAgent(ValueEstimationAgent):
             if acs:
               oldvalues[s] = max([self.getQValue(s, ac) for ac in acs])
           self.values = oldvalues.copy()
-
-
 
     def getValue(self, state):
         """
