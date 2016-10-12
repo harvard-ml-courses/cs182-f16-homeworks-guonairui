@@ -45,8 +45,6 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-=======
-
         for _ in xrange(iterations): 
           oldvalues = util.Counter()
           for s in mdp.getStates(): 
@@ -54,9 +52,6 @@ class ValueIterationAgent(ValueEstimationAgent):
             if acs:
               oldvalues[s] = max([self.getQValue(s, ac) for ac in acs])
           self.values = oldvalues.copy()
-
-
->>>>>>> 3e2340e6a670a1f314130b6f096d1fb203cf9b27
 
     def getValue(self, state):
         """
@@ -71,7 +66,6 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-=======
         # variable shadowing to make stuff a little more readable / 
         # wanted the list comprehension to fit on one line lmao
         get_ts_p = lambda s, a: self.mdp.getTransitionStatesAndProbs(s, a)
@@ -81,7 +75,6 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         val = sum([(p * (get_rew(s, a, ts) + (d * get_v(ts)))) for ts, p in get_ts_p(s,a)])
         return val 
->>>>>>> 3e2340e6a670a1f314130b6f096d1fb203cf9b27
 
     def computeActionFromValues(self, state):
         """
