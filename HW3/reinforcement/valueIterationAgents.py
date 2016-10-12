@@ -45,25 +45,22 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-        self.oldvalues = util.Counter()
 
-        for k in range(iterations + 1):
-          for state in mdp.getStates():
-            for action in mdp.getPossibleActions(state):
-              value = 0
-              for tranState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
-                value += prob * (mdp.getReward(state, action, tranState) + (discount * self.oldvalues[tranState]))
-              self.values[state, action] = value
-              if value > self.values[state] or mdp.isTerminal(tranState):
-                self.values[state] = value
-          if k != iterations:
-            self.oldvalues = self.values.copy()
+        for _ in xrange(iterations): 
+          oldvalues = util.Counter()
+          for s in mdp.getStates(): 
+            acs = mdp.getPossibleActions(s) 
+            if acs:
+              oldvalues[s] = max([self.getQValue(s, ac) for ac in acs])
+          self.values = oldvalues.copy()
+
+
 
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
         """
-        return self.oldvalues[state]
+        return self.values[state]
 
 
     def computeQValueFromValues(self, state, action):
@@ -72,10 +69,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        # if action == 'exit':
-        #     return self.mdp.getReward(state, action, 'TERMINAL_STATE')
-        # print state, action, self.values[state, action]
-        return self.values[state, action]
+        # variable shadowing to make stuff a little more readable / 
+        # wanted the list comprehension to fit on one line lmao
+        get_ts_p = lambda s, a: self.mdp.getTransitionStatesAndProbs(s, a)
+        get_rew = lambda s, a, ts: self.mdp.getReward(s, a, ts)
+        get_v = lambda s: self.getValue(s)
+        s, a, d = state, action, self.discount
+
+        val = sum([(p * (get_rew(s, a, ts) + (d * get_v(ts)))) for ts, p in get_ts_p(s,a)])
+        return val 
 
     def computeActionFromValues(self, state):
         """
@@ -87,13 +89,13 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        max = float('-inf')
+        _max = float('-inf')
         best = None
-        for action in self.mdp.getPossibleActions(state):
-          if len(self.mdp.getPossibleActions(state)) == 0 or self.mdp.isTerminal(state):
+        if not(len(self.mdp.getPossibleActions(state))) or self.mdp.isTerminal(state):
             return None
-          if self.values[state, action] > max:
-            max = self.values[state, action]
+        for action in self.mdp.getPossibleActions(state):
+          if self.getQValue(state, action) > _max:
+            _max = self.getQValue(state, action)
             best = action
         return best
 
