@@ -45,25 +45,25 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-        self.oldvalues = util.Counter()
+        self.nextValues = self.values.copy()
 
         for k in range(iterations + 1):
           for state in mdp.getStates():
             for action in mdp.getPossibleActions(state):
               value = 0
               for tranState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
-                value += prob * (mdp.getReward(state, action, tranState) + (discount * self.oldvalues[tranState]))
-              self.values[state, action] = value
-              if value > self.values[state] or mdp.isTerminal(tranState):
-                self.values[state] = value
+                value += prob * (mdp.getReward(state, action, tranState) + (discount * self.values[tranState]))
+              self.nextValues[state, action] = value
+              if value > self.nextValues[state] or mdp.isTerminal(tranState):
+                self.nextValues[state] = value
           if k != iterations:
-            self.oldvalues = self.values.copy()
+            self.values = self.nextValues.copy()
 
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
         """
-        return self.oldvalues[state]
+        return self.values[state]
 
 
     def computeQValueFromValues(self, state, action):
@@ -75,7 +75,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         # if action == 'exit':
         #     return self.mdp.getReward(state, action, 'TERMINAL_STATE')
         # print state, action, self.values[state, action]
-        return self.values[state, action]
+        return self.nextValues[state, action]
 
     def computeActionFromValues(self, state):
         """
