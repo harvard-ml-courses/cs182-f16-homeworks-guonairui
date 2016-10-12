@@ -46,8 +46,8 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
 
+        oldvalues = util.Counter()
         for _ in xrange(iterations): 
-          oldvalues = util.Counter()
           for s in mdp.getStates(): 
             acs = mdp.getPossibleActions(s) 
             if acs:
