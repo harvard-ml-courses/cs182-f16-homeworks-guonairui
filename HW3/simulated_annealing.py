@@ -37,7 +37,7 @@ def simulated_annealing():
     trace = []
 
     items = zip(w,v)
-    tmax = 500
+    tmax = 200
 
     for t in range(tmax):
     	T = tmax - t
@@ -49,7 +49,7 @@ def simulated_annealing():
     	itemWeight, itemVal = item
 
     	# If the weight can be added, then just add it
-    	if totalWeight + itemWeight < W:
+    	if totalWeight + itemWeight <= W:
     		bag.append(item)
     		totalWeight += itemWeight
     		currentVal += itemVal
@@ -59,13 +59,22 @@ def simulated_annealing():
 
     	# If you can't, ask the fucking neighbors
     	else:
-    		# Define a neighbor as the bag with the heaviest item removed and random item added
+    		# Define a neighbor as the bag with worst w/v ratio item removed
     		neighbor = list(bag)
-    		removed = neighbor.pop(neighbor.index(max(neighbor, key=lambda item:item[0])))
+    		removed = neighbor.pop(neighbor.index(min(neighbor, key=lambda item:(float(item[1])/item[0]))))
     		removedWeight, removedVal = removed
-    		neighborWeight = totalWeight - removedWeight + itemWeight
-    		neighborVal = currentVal - removedVal + itemVal
-    		neighbor.append(item)
+
+    		left = False
+
+    		if totalWeight - removedWeight + itemWeight <= W:
+    			neighborWeight = totalWeight - removedWeight + itemWeight
+    			neighborVal = currentVal - removedVal + itemVal
+    			neighbor.append(item)
+
+    		else:
+				neighborWeight = totalWeight - removedWeight
+				neighborVal = currentVal - removedVal
+				left = True
 
     		# If the neighbor is better or some probability, then set current state to neighbor state
     		if neighborVal > currentVal or rand.random() <= math.exp((neighborVal - currentVal)/T):
@@ -77,10 +86,14 @@ def simulated_annealing():
 
     			# Add this value to the trace
     			trace.append(currentVal)
+
+    			if left == True:
+    				items.append(item)
     		else:
     			# Put the random item back
     			items.append(item)
 
+    print totalWeight, currentVal, bag
     return trace
 
 if __name__ == "__main__":
