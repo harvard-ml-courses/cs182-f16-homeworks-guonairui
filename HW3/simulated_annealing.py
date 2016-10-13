@@ -37,7 +37,7 @@ def simulated_annealing():
     trace = []
 
     items = zip(w,v)
-    tmax = 200
+    tmax = 300
 
     for t in range(tmax):
     	T = tmax - t
@@ -64,6 +64,7 @@ def simulated_annealing():
     		removed = neighbor.pop(neighbor.index(min(neighbor, key=lambda item:(float(item[1])/item[0]))))
     		removedWeight, removedVal = removed
 
+    		# boolean to keep track of whether or not we left the random item
     		left = False
 
     		if totalWeight - removedWeight + itemWeight <= W:
@@ -71,6 +72,7 @@ def simulated_annealing():
     			neighborVal = currentVal - removedVal + itemVal
     			neighbor.append(item)
 
+    		# leave the random item, just remove the worst w/v ratio item
     		else:
 				neighborWeight = totalWeight - removedWeight
 				neighborVal = currentVal - removedVal
@@ -87,6 +89,7 @@ def simulated_annealing():
     			# Add this value to the trace
     			trace.append(currentVal)
 
+    			# if we left the random item, put it back in the items bin
     			if left == True:
     				items.append(item)
     		else:
