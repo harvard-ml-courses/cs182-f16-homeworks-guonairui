@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random as rand
+import math
 
 #number of items
 N = 100
@@ -28,7 +30,58 @@ v = np.array([25, 27, 15, 25, 13, 15, 18, 24, 25, 30, 12, 18, 28, 30, 20, 26, 24
 def simulated_annealing():
     # YOUR CODE HERE
     # return a trace of values resulting from your simulated annealing
-    return np.random.random_integers(200,300, 10)
+
+    bag = []
+    totalWeight = 0
+    currentVal = 0
+    trace = []
+
+    items = zip(w,v)
+    tmax = 500
+
+    for t in range(tmax):
+    	T = tmax - t
+    	if T == 0:
+    		return trace
+
+    	# Pick a random item 
+    	item = items.pop(rand.randrange(len(items)))
+    	itemWeight, itemVal = item
+
+    	# If the weight can be added, then just add it
+    	if totalWeight + itemWeight < W:
+    		bag.append(item)
+    		totalWeight += itemWeight
+    		currentVal += itemVal
+
+    		# Add this value to the trace
+    		trace.append(currentVal)
+
+    	# If you can't, ask the fucking neighbors
+    	else:
+    		# Define a neighbor as the bag with the heaviest item removed and random item added
+    		neighbor = list(bag)
+    		removed = neighbor.pop(neighbor.index(max(neighbor, key=lambda item:item[0])))
+    		removedWeight, removedVal = removed
+    		neighborWeight = totalWeight - removedWeight + itemWeight
+    		neighborVal = currentVal - removedVal + itemVal
+    		neighbor.append(item)
+
+    		# If the neighbor is better or some probability, then set current state to neighbor state
+    		if neighborVal > currentVal or rand.random() <= math.exp((neighborVal - currentVal)/T):
+    			bag = list(neighbor)
+    			totalWeight = neighborWeight.copy()
+    			currentVal = neighborVal.copy()
+    			# Put the removed item back
+    			items.append(removed)
+
+    			# Add this value to the trace
+    			trace.append(currentVal)
+    		else:
+    			# Put the random item back
+    			items.append(item)
+
+    return trace
 
 if __name__ == "__main__":
     # Greedy result is maximize v/w
