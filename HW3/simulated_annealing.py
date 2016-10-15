@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import random as rand
 import math
 
+# Gabbi Merz and Larry Guo
+
 #number of items
 N = 100
 
