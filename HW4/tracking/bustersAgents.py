@@ -169,13 +169,13 @@ class GreedyBustersAgent(BustersAgent):
         for ghostPositionDistribution in livingGhostPositionDistributions:
             ghostPosition = max(ghostPositionDistribution, key=ghostPositionDistribution.get)
             ghostDistance = self.distancer.getDistance(ghostPosition, pacmanPosition)
-            ghosts = ghosts + [(ghostPosition, ghostDistance)]
+            ghosts.append((ghostPosition, ghostDistance))
 
         bestGhost, _ = min(ghosts, key = lambda t: t[1])
         
         actionDistances = []
         for action in legal:
-            actionDistances = actionDistances + [(action, self.distancer.getDistance(Actions.getSuccessor(pacmanPosition, action), bestGhost))]
+            actionDistances.append((action, self.distancer.getDistance(Actions.getSuccessor(pacmanPosition, action), bestGhost)))
 
         action, _ = min(actionDistances, key = lambda t: t[1])
         return action
