@@ -263,6 +263,13 @@ class ParticleFilter(InferenceModule):
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+        # numEach = self.numParticles / len(self.legalPositions)
+        # remainder = self.numParticles % len(self.legalPositions)
+        # particles = []
+        # for position in self.legalPositions:
+        #     particles = particles + [position] * numEach
+        # return particles
+
         lngth = len(self.legalPositions)
         legal, np = random.sample(self.legalPositions, lngth), self.numParticles
         self.particles = [legal[idx % lngth] for idx in range(np)]
@@ -317,7 +324,6 @@ class ParticleFilter(InferenceModule):
             for _ in xrange(self.numParticles): 
                 newParticles.append(util.sample(newBeliefs))
             self.particles = newParticles
-
 
     def elapseTime(self, gameState):
         """
