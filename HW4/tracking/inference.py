@@ -153,16 +153,17 @@ class ExactInference(InferenceModule):
         # Be sure to handle the "jail" edge case where the ghost is eaten
         # and noisyDistance is None
         allPossible = util.Counter()
-        for p in self.legalPositions:
-            if noisyDistance == None:
-                allPossible[self.getJailPosition()] = 1.0
-                break
-            else:
+
+        # updated this to be outside of loop because you don't need to check 
+        # within loop every time -Gabbi
+        if noisyDistance == None:
+            allPossible[self.getJailPosition()] = 1.0
+        else: 
+            for p in self.legalPositions:
                 trueDistance = util.manhattanDistance(p, pacmanPosition)
                 if emissionModel[trueDistance] > 0:
                     allPossible[p] = emissionModel[trueDistance] * self.beliefs[p]
         "*** END YOUR CODE HERE ***"
-
         allPossible.normalize()
         self.beliefs = allPossible
 
@@ -262,14 +263,16 @@ class ParticleFilter(InferenceModule):
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
-        numEach = self.numParticles / len(self.legalPositions)
-        remainder = self.numParticles % len(self.legalPositions)
-        particles = []
-        for position in self.legalPositions:
-            particles = particles + [position] * numEach
-        return particles
+        # numEach = self.numParticles / len(self.legalPositions)
+        # remainder = self.numParticles % len(self.legalPositions)
+        # particles = []
+        # for position in self.legalPositions:
+        #     particles = particles + [position] * numEach
+        # return particles
 
-        # Handle the edge case with remainderrrrs
+        lngth = len(self.legalPositions)
+        legal, np = random.sample(self.legalPositions, lngth), self.numParticles
+        self.beliefs = [legal[idx % lngth] for idx in range(np)]
 
 
 
@@ -300,11 +303,27 @@ class ParticleFilter(InferenceModule):
         You may also want to use util.manhattanDistance to calculate the
         distance between a particle and Pacman's position.
         """
-        noisyDistance = observation
-        emissionModel = busters.getObservationDistribution(noisyDistance)
-        pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        
+        evidenceDict = busters.getObservationDistribution(observation)
+        pos = gameState.getPacmanPosition()
+        newBeliefs = util.Counter()
+        beliefDist = self.getBeliefDistribution()
+        def genWeighted(pos, particleList, evidenceDict, newBeliefs, beliefDist):
+            for particle in particleList:
+                dist = util.manhattanDistance(pos, particle) 
+                newBeliefs[particle] = evidenceDict[dist] * beliefDist[particle]
+            return newBeliefs
+        if observation == None:
+            newBeliefs[self.getJailPosition()] = 1.0
+        else: 
+            newBeliefs = genWeighted(pos, self.beliefs, evidenceDict, newBeliefs, beliefDist)
+        if newBeliefs.totalCount() == 0: 
+            self.initializeUniformly(gameState)
+        else:         
+            newParticles = []
+            for _ in xrange(self.numParticles): 
+                newParticles.append(util.sample(newBeliefs))
+            self.beliefs = newParticles
 
     def elapseTime(self, gameState):
         """
@@ -321,7 +340,8 @@ class ParticleFilter(InferenceModule):
         a belief distribution.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        getDist = lambda p: self.getPositionDistribution(self.setGhostPosition(gameState, p))
+        self.beliefs = [util.sample(getDist(p)) for p in self.beliefs]
 
     def getBeliefDistribution(self):
         """
@@ -331,7 +351,11 @@ class ParticleFilter(InferenceModule):
         Counter object)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        beliefDist = util.Counter()
+        for particle in self.beliefs: 
+            beliefDist[particle] += 1
+        beliefDist.normalize()
+        return beliefDist
 
 class MarginalInference(InferenceModule):
     """
@@ -404,6 +428,8 @@ class JointParticleFilter:
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+
+
 
     def addGhostAgent(self, agent):
         """
