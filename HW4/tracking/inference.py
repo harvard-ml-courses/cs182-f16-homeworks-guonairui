@@ -299,19 +299,27 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
         evidenceDict = busters.getObservationDistribution(observation)
         pos = gameState.getPacmanPosition()
+
+        # initialize new distribution and get prior belief distribution 
         newBeliefs = util.Counter()
         beliefDist = self.getBeliefDistribution()
-        def genWeighted(pos, particleList, evidenceDict, newBeliefs, beliefDist):
-            for particle in particleList:
-                dist = util.manhattanDistance(pos, particle) 
-                newBeliefs[particle] = evidenceDict[dist] * beliefDist[particle]
-            return newBeliefs
+
+        # if observation is done, update beliefs to 
+        # reflect that the ghost is in jail
         if observation == None:
             newBeliefs[self.getJailPosition()] = 1.0
+
+        # otherwise, update beliefs for each particle in particles 
         else: 
-            newBeliefs = genWeighted(pos, self.particles, evidenceDict, newBeliefs, beliefDist)
+            for particle in self.particles: 
+                dist = util.manhattanDistance(pos, particle)
+                newBeliefs[particle] = evidenceDict[dist] * beliefDist[particle]
+
+        # if the weights of each particle are 0, re-intialize 
         if newBeliefs.totalCount() == 0: 
             self.initializeUniformly(gameState)
+
+        # otherwise, sample + normalize 
         else:         
             newParticles = []
             for _ in xrange(self.numParticles): 
@@ -471,20 +479,20 @@ class JointParticleFilter:
         if len(noisyDistances) < self.numGhosts:
             return
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
+        
         "*** YOUR CODE HERE ***"
         newBeliefs = util.Counter()
-        for i in xrange(self.numGhosts): 
-            if noisyDistances[i] is None:
-                for idx, particle in enumerate(self.particles):
-                    self.particles[idx] = self.getParticleWithGhostInJail(particle, i)
-      
         beliefDist = self.getBeliefDistribution()
+
+
         for particle in self.particles: 
             prob = beliefDist[particle]
             for i in xrange(self.numGhosts): 
-                dist = util.manhattanDistance(pacmanPosition, list(particle)[i])
-                prob *= emissionModels[i][dist]
+                if noisyDistances[i] is not None: 
+                    dist = util.manhattanDistance(pacmanPosition, list(particle)[i])
+                    prob *= emissionModels[i][dist]
             newBeliefs[particle] = prob
+
         if newBeliefs.totalCount() == 0: 
             self.initializeParticles()
         else:         
@@ -492,6 +500,10 @@ class JointParticleFilter:
             for _ in xrange(self.numParticles): 
                 newParticles.append(util.sample(newBeliefs))
             self.particles = newParticles
+            for i in xrange(self.numGhosts): 
+                if noisyDistances[i] is None: 
+                    self.particles = [self.getParticleWithGhostInJail(p, i) for p in self.particles]
+
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
         """
@@ -550,9 +562,10 @@ class JointParticleFilter:
         for oldParticle in self.particles:
             newParticle = list(oldParticle) # A list of ghost positions
             # now loop through and update each entry in newParticle...
-
             "*** YOUR CODE HERE ***"
-
+            for i in xrange(self.numGhosts): 
+                newPosDist = getPositionDistributionForGhost(setGhostPositions(gameState, oldParticle), i, self.ghostAgents[i])
+                newParticle[i] = util.sample(newPosDist)
             "*** END YOUR CODE HERE ***"
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
