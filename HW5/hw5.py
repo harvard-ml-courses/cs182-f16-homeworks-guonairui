@@ -53,7 +53,7 @@ class TextClassifier:
         once the rating has emitted one word to the review, the next word
         has the same distribution over possible values as the first.
 
-        In this question, you will write a function that computes the
+        In this question, you will write a function that computes p(word|rating), the
         probability that the rating under question will produce
         each of the four words in our dictionary. We will run this function
         5 times, once for each rating. We pass in the number of times each
@@ -88,22 +88,23 @@ class TextClassifier:
     def q5(self, alpha=1):
         """
         Now you'll fit the model. For historical reasons, we'll call it F.
-        F[rating][word] is -log(p(rating|word)).
+        F[rating][word] is -log(p(word|rating)).
         The ratings run from 0-4 to match array indexing.
         Alpha is the per-word "strength" of the prior (as in q3).
+        (What might "fairness" mean here?)
         """
-        self.F = [[0,0,0], [0.3,0.3,0.4], [0.1,0.8,0.2], [0,0,0], [0,0,0]]
+        self.F = [[0,0,0], [0,0,0], [1,8,2], [0,0,0], [0,0,0]]
 
     def q6(self, infile):
         """
         Test time! The infile has the same format as it did before. For each review,
         predict the rating. Ignore words that don't appear in your dictionary.
-        Don't forget the prior!
+        Are there any factors that won't affect your prediction?
         You'll report both the list of predicted ratings in order and the accuracy.
         """
         return ([2], 0.000000000000182)
 
-    def q7(self):
+    def q7(self, infile):
         """
         Alpha (q5) is a hyperparameter of this model - a tunable option that affects
         the values that appear in F. Let's tune it!
@@ -143,5 +144,6 @@ if __name__ == '__main__':
     print "Fitting model..."
     c.q5()
     print "Accuracy on validation set:", c.q6('mini.valid')[1]
-    print "Good alpha:", c.q7()
+    print "Good alpha:", c.q7('mini.valid')
+    c.q5() #reset alpha
     print "Happy words:", " and ".join(c.q8()[4][:2])
