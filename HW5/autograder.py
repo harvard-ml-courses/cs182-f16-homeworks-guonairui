@@ -39,6 +39,7 @@ print "#### MINI ####"
 cut.q4('mini.train')
 print "Right number of words:", len(cut.dict) == 8, "and ratings:", sum(cut.nrated) == 5
 cut.q5()
+print "q5 generates right F:", test(sum(cut.F, []), [2.01, 2.01, 2.71, 2.71, 2.01, 2.71, 2.01, 1.32, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 1.5, 1.95, 1.95, 2.64, 2.64, 1.95, 1.95, 1.95, 1.95, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 1.5, 1.79, 1.79, 1.79, 1.79, 2.48, 2.48, 2.48, 2.48])
 ans = cut.q6('mini.valid')
 print "q6 has right predictions:", test(ans[0], [4, 0, 2], 1)
 print "q6 has right accuracy:", test(ans[1], 1./3, 1)
@@ -48,14 +49,14 @@ ans = cut.q6('mini.valid')
 print "q7 produces better accuracy:", test(int(ans[1] >= 1./3 and alpha != 1), 1, 2)
 cut.q5()
 ans = cut.q8()
-print "q8 hallucinates right words:", test(int(ans[2][0] == 'not' and ans[4][2] == '182' and 'rocks' in ans[4] and '!' in ans[4] and ans[0][0] == '.'), 1, 2)
+print "q8 hallucinates right words:", test(int(ans[2][0] == 'not' and ans[4][2] in ['182', 'cs'] and set(['rocks', '!']) == set(ans[4][:2]) and ans[0][0] == '.'), 1, 2)
 
 print "#### STSA ####"
 cut.q4('stsa.train')
 print "Right number of words:", len(cut.dict) == 16581, "and ratings:", sum(cut.nrated) == 8544
 cut.q5()
 ans = cut.q6('stsa.valid')
-print "q6 has right accuracy:", test(ans[1], 0.3851, 2)
+print "q6 has right accuracy:", test(ans[1], 0.3851, 1)
 ans = cut.q6('stsa.test')
 print "q6 has right accuracy:", test(ans[1], 0.4014, 2)
 alpha = cut.q7('stsa.valid')
@@ -64,6 +65,6 @@ ans = cut.q6('stsa.valid')
 print "q7 produces better accuracy:", test(int(ans[1] > 0.3851 and alpha != 1), 1, 2)
 cut.q5()
 ans = cut.q8()
-print "q8 hallucinates right words:", test(int(ans[0][0] == 'incoherent' and ans[1][0] == 'sadly' and ans[3][2] == 'experiment' and ans[4][0] == 'captivating' and ans[4][1] == 'splendid'), 1, 2)
+print "q8 hallucinates right words:", test(int(ans[0][0] == 'incoherent' and ans[1][0] == 'sadly' and 'diversion' in ans[3][:2] and ans[4][0] == 'captivating' and ans[4][1] == 'splendid'), 1, 2)
 
 print int(points), "out of 15 points received"
