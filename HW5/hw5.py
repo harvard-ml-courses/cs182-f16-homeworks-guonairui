@@ -90,7 +90,7 @@ class TextClassifier:
         Now you'll fit the model. For historical reasons, we'll call it F.
         F[rating][word] is -log(p(word|rating)).
         The ratings run from 0-4 to match array indexing.
-        Alpha is the per-word "strength" of the prior (as in q3).
+        Alpha is the per-word "strength" of the prior (as in q2).
         (What might "fairness" mean here?)
         """
         self.F = [[0,0,0], [0,0,0], [1,8,2], [0,0,0], [0,0,0]]
