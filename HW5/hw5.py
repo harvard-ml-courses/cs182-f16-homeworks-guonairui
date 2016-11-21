@@ -1,5 +1,7 @@
 from math import log
 
+#Collaborators: Larry Guo and Gabbi Merz
+
 class TextClassifier:
     """
     In this question, you will implement a classifier that predicts
