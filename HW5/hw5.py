@@ -94,16 +94,24 @@ class TextClassifier:
         rankingWords = [Counter() for _ in xrange(5)]
         with open(infile, 'r') as f: 
             for line in f: 
+                # parse information 
                 words = line.split(' ')
                 ranking, words = int(words[0]), [word.strip('\n') for word in words[1:]]
+
+                # update rankings + words in rankings
                 rankingToTotal[ranking] += 1
                 rankingWords[ranking].update(words)
+
+                # iterate through words + add them to word -> idx dict
                 for word in words: 
                     if word not in wordsToIndex: 
                         wordsToIndex[word] = count 
                         count += 1 
 
+        # initialize 
         wordsRankingTotal = [[0 for _ in xrange(count)] for _ in xrange(5)]
+
+        # iterate
         for ranking, wordCounter in enumerate(rankingWords): 
             for word in wordCounter.iterkeys(): 
                 wordsRankingTotal[ranking][wordsToIndex[word]] = wordCounter[word]
@@ -137,10 +145,11 @@ class TextClassifier:
         """
 
         # p(ranking | words) = p(words | ranking)p(ranking)/p(words)
-        # p(words) = \sum_{rankings}p(rankings)p(words|rankings)
+        # p(words) is constant so we don't care
         correctPredictions, totalPredictions = 0,0 
         predictionList = []
         rankingProbs = [float(rTotal) / sum(self.nrated) for rTotal in self.nrated]
+        rankingProbs = map(lambda num: -log(num) if num != 0 else 0, rankingProbs)
         with open(infile, 'r') as f: 
             for line in f: 
                 words = line.split(' ')
@@ -151,15 +160,13 @@ class TextClassifier:
                         for ranking in xrange(5): 
                             # log probability so we add? 
                             wordsGivenRankings[ranking] += self.F[ranking][self.dict[word]]
-                # law of total probability, exponentiate wordsGivenRankings
-                totalWordProb = sum([rankingProbs[idx]*exp(-wordsGivenRankings[idx]) for idx in xrange(5)]) 
-                finalProbs = [wordsGivenRankings[idx]*rankingProbs[idx] / totalWordProb for idx in xrange(5)]
-                prediction = finalProbs.index(max(finalProbs))
+                finalProbs = [wordsGivenRankings[idx] + rankingProbs[idx]  for idx in xrange(5)]
+                prediction = finalProbs.index(min(finalProbs))
                 predictionList.append(prediction)
                 correctPredictions += int(prediction == rating)
                 totalPredictions += 1 
         print predictionList
-        accuracy = correctPredictions/totalPredictions
+        accuracy = correctPredictions / float(totalPredictions)
         return (predictionList, accuracy)
 
     def q7(self, infile):
