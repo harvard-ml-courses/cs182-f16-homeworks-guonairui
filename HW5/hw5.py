@@ -1,4 +1,5 @@
-from math import log
+from math import log, exp
+from collections import Counter
 
 class TextClassifier:
     """
@@ -15,7 +16,7 @@ class TextClassifier:
         """
         Return your full name as it appears in the class roster
         """
-        return "Scott Kuindersma"
+        return ['Gabriela Merz', 'Larry Guo']
 
     def q1(self):
         """
@@ -25,7 +26,10 @@ class TextClassifier:
         Given only this information, what are the most likely
         probabilities of rolling each side? (Hardcoding is fine)
         """
-        return [0.1, 0.8, 0.2, 0.0]
+        # we have 20 total rolls, so our most likely probabilities
+        # are thed number of times a value appears / total number
+        # of times we roll 
+        return [0.4, 0.2, 0.1, 0.3]
 
     def q2(self):
         """
@@ -39,7 +43,9 @@ class TextClassifier:
         Using the same observations as in q1 and a prior with a per-side
         "strength" of 2, what are the probabilities of rolling each side??
         """
-        return [0.1, 0.8, 0.2, 0.0]
+        # just get back our original values from q1 by multiplying
+        # by 20, then add 2 and divide by our new total, 28
+        return [(x * 20.0 + 2)/28 for x in self.q1()]
 
     def q3(self, counts=[1,1,3,8]):
         """
@@ -59,7 +65,8 @@ class TextClassifier:
         5 times, once for each rating. We pass in the number of times each
         word shows up in any review corresponding to the current rating.
         """
-        return [0.1, 0.8, 0.2, 0.0]
+        # we again apply the naive definition of probability 
+        return [(x * 1.0)/sum(counts) for x in counts]
 
     def q4(self, infile):
         """
@@ -81,9 +88,29 @@ class TextClassifier:
         reviews corresponding to ranking
         nrated[ranking] is the total number of reviews with each ranking
         """
-        self.dict = {"compsci": 0, "182": 1, ".": 2}
-        self.counts = [[0,0,0],[0,0,0],[1,1,1],[0,0,0],[0,0,0]]
-        self.nrated = [0,0,1,0,0]
+        rankingToTotal = [0 for _ in xrange(5)]
+        count = 0
+        wordsToIndex = {}
+        rankingWords = [Counter() for _ in xrange(5)]
+        with open(infile, 'r') as f: 
+            for line in f: 
+                words = line.split(' ')
+                ranking, words = int(words[0]), [word.strip('\n') for word in words[1:]]
+                rankingToTotal[ranking] += 1
+                rankingWords[ranking].update(words)
+                for word in words: 
+                    if word not in wordsToIndex: 
+                        wordsToIndex[word] = count 
+                        count += 1 
+
+        wordsRankingTotal = [[0 for _ in xrange(count)] for _ in xrange(5)]
+        for ranking, wordCounter in enumerate(rankingWords): 
+            for word in wordCounter.iterkeys(): 
+                wordsRankingTotal[ranking][wordsToIndex[word]] = wordCounter[word]
+
+        self.dict = wordsToIndex
+        self.counts = wordsRankingTotal
+        self.nrated = rankingToTotal
 
     def q5(self, alpha=1):
         """
@@ -92,8 +119,14 @@ class TextClassifier:
         The ratings run from 0-4 to match array indexing.
         Alpha is the per-word "strength" of the prior (as in q2).
         (What might "fairness" mean here?)
-        """
-        self.F = [[0,0,0], [0,0,0], [1,8,2], [0,0,0], [0,0,0]]
+        # """
+        model = [[0 for _ in range(len(self.dict))] for _ in xrange(5)]
+        for ranking, wordList in enumerate(self.counts): 
+            for wordIdx, wordTotal in enumerate(wordList): 
+                val = float(wordTotal + alpha) / (sum(wordList) + (len(wordList) * alpha))
+                if val != 0: 
+                    model[ranking][wordIdx] = -1 * log(val)
+        self.F = model 
 
     def q6(self, infile):
         """
@@ -102,7 +135,32 @@ class TextClassifier:
         Are there any factors that won't affect your prediction?
         You'll report both the list of predicted ratings in order and the accuracy.
         """
-        return ([2], 0.000000000000182)
+
+        # p(ranking | words) = p(words | ranking)p(ranking)/p(words)
+        # p(words) = \sum_{rankings}p(rankings)p(words|rankings)
+        correctPredictions, totalPredictions = 0,0 
+        predictionList = []
+        rankingProbs = [float(rTotal) / sum(self.nrated) for rTotal in self.nrated]
+        with open(infile, 'r') as f: 
+            for line in f: 
+                words = line.split(' ')
+                rating, words = int(words[0]), [word.strip('\n') for word in words[1:]]
+                wordsGivenRankings = [0 for _ in xrange(5)]
+                for word in words: 
+                    if word in self.dict: 
+                        for ranking in xrange(5): 
+                            # log probability so we add? 
+                            wordsGivenRankings[ranking] += self.F[ranking][self.dict[word]]
+                # law of total probability, exponentiate wordsGivenRankings
+                totalWordProb = sum([rankingProbs[idx]*exp(-wordsGivenRankings[idx]) for idx in xrange(5)]) 
+                finalProbs = [wordsGivenRankings[idx]*rankingProbs[idx] / totalWordProb for idx in xrange(5)]
+                prediction = finalProbs.index(max(finalProbs))
+                predictionList.append(prediction)
+                correctPredictions += int(prediction == rating)
+                totalPredictions += 1 
+        print predictionList
+        accuracy = correctPredictions/totalPredictions
+        return (predictionList, accuracy)
 
     def q7(self, infile):
         """
