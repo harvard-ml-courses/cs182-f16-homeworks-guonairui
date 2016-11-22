@@ -202,7 +202,27 @@ class TextClassifier:
         You'll return the strings rather than the indices, and in decreasing order of
         representativeness.
         """
-        return [["182", "compsci", "."] for _ in range(5)]
+        # Let's initialize some data structures!!!!!
+        revDict = {v: k for k, v in self.dict.iteritems()}
+        topThree = [[None for _ in xrange(3)] for _ in range(5)]
+
+
+        for rating, wordList in enumerate(self.F):
+            wordDiff = [float('inf') for _ in revDict]
+            for ratingP, wordListP in enumerate(self.F):
+                if rating == ratingP:
+                    continue
+                for word, val in enumerate(wordList):
+                    diff = wordListP[word] - val
+                    if diff < wordDiff[word]:
+                        wordDiff[word] = diff
+
+            sortedWordDiff = sorted(list(enumerate(wordDiff)), key=lambda item: item[1], reverse=True)
+            for i in xrange(3):
+                topThree[rating][i] = revDict[sortedWordDiff[i][0]]
+                print topThree[rating][i]
+
+        return topThree
 
     """
     You did it! If you're curious, the dataset came from (Socher 2013), which describes
