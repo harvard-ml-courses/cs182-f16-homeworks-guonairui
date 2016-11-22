@@ -1,7 +1,6 @@
 from math import log, exp
 from collections import Counter
-
-#Collaborators: Larry Guo and Gabbi Merz
+import random
 
 class TextClassifier:
     """
@@ -68,7 +67,7 @@ class TextClassifier:
         word shows up in any review corresponding to the current rating.
         """
         # we again apply the naive definition of probability 
-        return [(x * 1.0)/sum(counts) for x in counts]
+        return [float(x)/sum(counts) for x in counts]
 
     def q4(self, infile):
         """
@@ -90,9 +89,9 @@ class TextClassifier:
         reviews corresponding to ranking
         nrated[ranking] is the total number of reviews with each ranking
         """
-        rankingToTotal = [0 for _ in xrange(5)]
+        self.nrated = [0 for _ in xrange(5)]
         count = 0
-        wordsToIndex = {}
+        self.dict = {}
         rankingWords = [Counter() for _ in xrange(5)]
         with open(infile, 'r') as f: 
             for line in f: 
@@ -101,26 +100,21 @@ class TextClassifier:
                 ranking, words = int(words[0]), [word.strip('\n') for word in words[1:]]
 
                 # update rankings + words in rankings
-                rankingToTotal[ranking] += 1
+                self.nrated[ranking] += 1
                 rankingWords[ranking].update(words)
 
                 # iterate through words + add them to word -> idx dict
                 for word in words: 
-                    if word not in wordsToIndex: 
-                        wordsToIndex[word] = count 
+                    if word not in self.dict: 
+                        self.dict[word] = count 
                         count += 1 
-
         # initialize 
-        wordsRankingTotal = [[0 for _ in xrange(count)] for _ in xrange(5)]
+        self.counts = [[0 for _ in xrange(count)] for _ in xrange(5)]
 
         # iterate
         for ranking, wordCounter in enumerate(rankingWords): 
-            for word in wordCounter.iterkeys(): 
-                wordsRankingTotal[ranking][wordsToIndex[word]] = wordCounter[word]
-
-        self.dict = wordsToIndex
-        self.counts = wordsRankingTotal
-        self.nrated = rankingToTotal
+            for word in wordCounter.iterkeys():
+                self.counts[ranking][self.dict[word]] = wordCounter[word]
 
     def q5(self, alpha=1):
         """
@@ -131,12 +125,14 @@ class TextClassifier:
         (What might "fairness" mean here?)
         # """
         model = [[0 for _ in range(len(self.dict))] for _ in xrange(5)]
-        for ranking, wordList in enumerate(self.counts): 
+        for ranking, wordList in enumerate(self.counts):
+            wordTotalSum = float(sum(wordList) + len(wordList) * alpha)
             for wordIdx, wordTotal in enumerate(wordList): 
-                val = float(wordTotal + alpha) / (sum(wordList) + (len(wordList) * alpha))
+                val = (wordTotal + alpha) / wordTotalSum
                 if val != 0: 
                     model[ranking][wordIdx] = -1 * log(val)
-        self.F = model 
+
+        self.F = model
 
     def q6(self, infile):
         """
@@ -167,7 +163,7 @@ class TextClassifier:
                 predictionList.append(prediction)
                 correctPredictions += int(prediction == rating)
                 totalPredictions += 1 
-        print predictionList
+        # print predictionList
         accuracy = correctPredictions / float(totalPredictions)
         return (predictionList, accuracy)
 
@@ -183,7 +179,18 @@ class TextClassifier:
         Find and return a good value of alpha (hint: you will want to call q5 and q6).
         What happens when alpha = 0?
         """
-        return 0
+        # apparently 2 is pretty good for STSA
+        bestAcc = 0
+        bestAlpha = 1
+        for i in xrange(1, 11):
+            newAlpha = i
+            self.q5(newAlpha)
+            _, newAcc  = self.q6(infile)
+            if newAcc >= bestAcc:
+                bestAcc = newAcc
+                bestAlpha = newAlpha
+
+        return bestAlpha
 
     def q8(self):
         """
