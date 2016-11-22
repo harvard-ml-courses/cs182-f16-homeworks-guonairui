@@ -220,7 +220,6 @@ class TextClassifier:
             sortedWordDiff = sorted(list(enumerate(wordDiff)), key=lambda item: item[1], reverse=True)
             for i in xrange(3):
                 topThree[rating][i] = revDict[sortedWordDiff[i][0]]
-                print topThree[rating][i]
 
         return topThree
 
